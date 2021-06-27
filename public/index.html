@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+
+    <title>Svelte PWA</title>
+
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="description" content="Svelte PWA starter template" />
+    <meta name="theme-color" content="#FEDE58" />
+
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <meta name="apple-mobile-web-app-title" content="Svelte PWA" />
+    <link rel="apple-touch-icon" href="/images/icons/icon-152x152.png" />
+
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="stylesheet" href="/global.css" />
+    <link rel="stylesheet" href="/build/bundle.css" />
+
+    <!-- You can remove this is you don't want to make your PWA installable -->
+    <script
+      type="module"
+      src="https://cdn.jsdelivr.net/npm/@pwabuilder/pwainstall"
+    ></script>
+
+    <script defer src="/build/bundle.js"></script>
+  </head>
+
+  <body>
+    <noscript>
+      <div>Oops! Javascript required here! Allow it and try again!</div>
+    </noscript>
+
+    <script>
+      let serviceWorkerUpdated = false;
+      let serviceWorkerRegistration = null;
+
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker
+            .register('/service-worker.js')
+            // .then((reg) => {
+            //   serviceWorker.register({
+            //     // onSuccess: () => { setInit(); },
+            //     onUpdate: (registration) => setUpdate(registration),
+            //   });
+            //   console.log('Service worker registered.', reg);
+            // })
+            .then((registration) => {
+              serviceWorkerRegistration = registration;
+              registration.onupdatefound = () => {
+                const installingWorker = registration.installing;
+                if (installingWorker == null) {
+                  return;
+                }
+                installingWorker.onstatechange = () => {
+                  if (installingWorker.state === 'installed') {
+                    if (navigator.serviceWorker.controller) {
+                      // At this point, the updated precached content has been fetched,
+                      // but the previous service worker will still serve the older
+                      // content until all client tabs are closed.
+                      console.log(
+                        'New content is available and will be used when all ' +
+                          'tabs for this page are closed. See http://bit.ly/CRA-PWA.',
+                      );
+
+                      // Execute callback
+                      // alert('new version of program about to load');
+                      // updateServiceWorker();
+                    } else {
+                      // At this point, everything has been precached.
+                      // It's the perfect time to display a
+                      // "Content is cached for offline use." message.
+                      console.log('Content is cached for offline use.');
+                    }
+                  }
+                };
+              };
+            });
+        });
+      }
+      const updateServiceWorker = () => {
+        const registrationWaiting = serviceWorkerRegistration.waiting;
+
+        if (registrationWaiting) {
+          registrationWaiting.postMessage({ type: 'SKIP_WAITING' });
+
+          registrationWaiting.addEventListener('statechange', (e) => {
+            if (e.target.state === 'activated') {
+              window.location.reload();
+            }
+          });
+        }
+      };
+    </script>
+  </body>
+</html>
+<!-- {isServiceWorkerUpdated && (
+  <Modal isOpen={true} style={{ background: 'white', height: '20%' }}>
+    <UpdateHdr>
+      <img className='logo' src={logo} width='40px' alt='' />
+      St.Edwards Booking System
+    </UpdateHdr>
+    <div>New Version of the Program is Available</div>
+    <footer>
+      <button onClick={updateServiceWorker}>Update</button>
+    </footer>
+  </Modal>
+  // <Alert
+  //   text='There is a new version available.'
+  //   buttonText='Update'
+  //   onClick={updateServiceWorker}
+  // />
+)}
+</div>
+);
+};
+const UpdateHdr = styled.div`
+font-size: 1.6em;
+font-weight: bold;
+img {
+margin-right: 0.5em;
+}
+`; -->

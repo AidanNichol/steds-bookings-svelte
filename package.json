@@ -1,6 +1,6 @@
 {
   "name": "svelte-app",
-  "version": "3.0.1-79",
+  "version": "3.0.1-80",
   "proxy": "http://localhost:4444",
   "scripts": {
     "build": "clear && yarn version --prerelease && rollup -c",
@@ -16,6 +16,7 @@
     "@rollup/plugin-node-resolve": "^10.0.0",
     "@rollup/plugin-typescript": "^8.2.0",
     "@tsconfig/svelte": "^1.0.10",
+    "basic-ftp": "^4.6.6",
     "eslint": "^7.17.0",
     "eslint-config-prettier": "^7.1.0",
     "eslint-plugin-prettier": "^3.3.1",

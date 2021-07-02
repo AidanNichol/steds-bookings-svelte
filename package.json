@@ -1,12 +1,12 @@
 {
   "name": "svelte-app",
-  "version": "3.0.1-81",
-  "proxy": "http://localhost:4444",
+  "version": "3.0.1-82",
   "scripts": {
     "build": "clear && yarn version --prerelease && rollup -c",
     "dev": "rollup -c -w",
     "testReport": "rollup -c -w testReport.js",
-    "start": "sirv public"
+    "start": "sirv public",
+    "deploy": "node deploy.mjs"
   },
   "devDependencies": {
     "@rollup/plugin-alias": "^3.1.1",
@@ -21,6 +21,7 @@
     "eslint-config-prettier": "^7.1.0",
     "eslint-plugin-prettier": "^3.3.1",
     "eslint-plugin-svelte3": "^3.0.0",
+    "log-update": "^4.0.0",
     "postcss": "^8.2.2",
     "postcss-cli": "^8.3.1",
     "postcss-import": "^14.0.0",

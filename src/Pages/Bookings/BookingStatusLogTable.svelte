@@ -122,10 +122,11 @@
       </div>
       <div class="payments">
         {#each preparePayments(mBookings) as pay}
-          <div class:highlight={highlightPayment === pay.paymentId}>
-            <span class="payDate" on:click={() => setHighlightDate(pay.paymentId)}
-              >{dispDate(pay.paymentId)}</span
-            >
+          <div
+            class:highlight={highlightPayment === pay.paymentId}
+            on:click={() => setHighlightDate(pay.paymentId)}
+          >
+            <span class="payDate">{dispDate(pay.paymentId)}</span>
             <span class="icon">{@html svgMap[pay.req]}</span>
 
             <!-- <Icon name={pay.req} class="icon" /> -->
@@ -142,7 +143,6 @@
       {#if owing(mBookings) == 0}
         <div class="ok">✔︎</div>
       {/if}
-
     </div>
   {/each}
   {#if credits.length > 0}
@@ -220,6 +220,7 @@
   .payments {
     grid-area: payments;
     align-self: flex-end;
+    cursor: pointer;
   }
   .ok {
     grid-area: ok;

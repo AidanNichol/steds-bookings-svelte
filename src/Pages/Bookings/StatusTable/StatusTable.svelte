@@ -70,7 +70,7 @@
 
   {#each $fundsManager.Members ?? [] as member, i}
     <div>
-      <MemberCell {member} {i} />
+      <MemberCell {member} />
     </div>
   {/each}
   {#each $openWalks as walk, w}

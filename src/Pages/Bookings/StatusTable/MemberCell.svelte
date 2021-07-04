@@ -4,7 +4,7 @@
   export let member;
   // let memD;
   let name;
-  let i = 0;
+
   let delS = {};
   let suspended = false;
   $: {
@@ -25,7 +25,7 @@
   };
 </script>
 
-<div class={`memberName avail member${i} ${suspended} ${member.subs}`} {...delS}>
+<div class={`memberName avail  ${suspended} ${member.subs}`} {...delS}>
   {name}
 </div>
 

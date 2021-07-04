@@ -6,8 +6,6 @@
   import { status as walkBookingStatus } from '@store/walkBookingStatus.js';
   import BusListSelectedWalk from './BusListSelectedWalk.svelte';
 
-  // import { useFetchData } from "@util/use-data-api";
-
   import SelectWalk from './SelectWalk.svelte';
 
   import Panel from '@utils/AJNPanel.svelte';

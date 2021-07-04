@@ -7,7 +7,8 @@
   import Icon from '@utils/Icon2.svelte';
   import { dispDate } from '@utils/dateFns';
   // import Notes20 from '../../images/poundSterling.jpg';
-  // import Notes20 from '@images/pound-banknote_1f4b7.png';
+  // eslint-disable-next-line no-unused-vars
+  import Notes20a from '@images/pound-banknote_1f4b7.png';
   import Notes20 from '@images/banknote-with-pound-sign_1f4b7.png';
   import { paid as paymentsMade, totalPaid } from '@store/payments';
   import { latestBanking as banking, bankMoney, showBanking } from '@store/banking';

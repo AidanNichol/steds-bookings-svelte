@@ -3,13 +3,14 @@
   export let isActive = false;
   export let isFirst = false;
   export let isHover = false;
+  export let getOptionLabel = null;
   export let filterText = '';
   let parts;
   let deleteable;
   $: deleteable = item.deceased || item.suspended || item.subscription < '2020';
   $: {
     var regex = new RegExp(`^(.*?)(${filterText})(.*)$`, 'i');
-    parts = item.sortName.match(regex);
+    parts = getOptionLabel(item).match(regex);
     if (!parts) parts = [item.sortName, '', ''];
     if (item.id === 'M1012') console.log(filterText, parts, deleteable, item);
   }

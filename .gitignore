@@ -3,3 +3,6 @@
 
 .DS_Store
 /junk
+yarn-error.*
+/yarn-error.log
+/.vscode

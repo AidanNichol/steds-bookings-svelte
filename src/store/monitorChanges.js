@@ -8,21 +8,32 @@ import Logit from '@utils/logit';
 var logit = Logit('store/monitorChanges');
 
 import { refreshedBookingStatus } from './walkBookingStatus';
-
+let retry = 0;
 const createEvents = () => {
-  let events = new EventSource('http://localhost:4444/monitorChanges');
-
-  events.onmessage = (event) => {
-    let { lastEventId: id, data } = event;
-    data = JSON.parse(data);
-    logit('monitorChanges event', id, data, event);
-    if (id === 'refreshBookingCount') refreshedBookingStatus(Object.values(data));
-    if (id === 'bookingChange') refreshAccountBookings(data);
-    if (id === 'refreshMemberIndex') updateMemberIndex(data);
+  // let events = new EventSource();
+  // `localhost:4444/bookingsServer/monitorChanges?who=app${retry++}`,
+  let events = new EventSource(`/bookingsServer/monitorChanges?who=app${retry++}`);
+  events.onerror = (error) => {
+    logit('error', error);
   };
+  events.onmessage = (e) => {
+    let { lastEventId: id, data, type } = e;
+    data = JSON.parse(data);
+    logit('monitorChanges event', { id, data, type }, e);
+    // if (id === 'refreshBookingCount') refreshedBookingStatus(Object.values(data));
+    // if (id === 'bookingChange') refreshAccountBookings(data);
+    // if (id === 'refreshMemberIndex') updateMemberIndex(data);
+  };
+  events.addEventListener('test', (e) => console.log('test event', e));
+  events.addEventListener('bookingChange', (e) => refreshAccountBookings(e.data));
+  events.addEventListener('refreshMemberIndex', (e) => updateMemberIndex(e.data));
+  events.addEventListener('refreshBookingCount', (e) => {
+    logit('monitorChanges refreshBookingCount', e.id, e.data, e);
+    refreshedBookingStatus(Object.values(e.data));
+  });
   return events;
 };
-let events = createEvents();
-setInterval(() => {
-  if (events.readyState === 2) createEvents();
-}, 10000);
+createEvents();
+// setInterval(() => {
+//   if (events.readyState === 2) createEvents();
+// }, 10000);

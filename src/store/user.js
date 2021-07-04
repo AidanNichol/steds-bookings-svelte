@@ -2,8 +2,7 @@ import _ from 'lodash';
 import { get, writable } from 'svelte/store';
 import { page } from './router.js';
 import { loaded, hydrate } from './store.js';
-import { postAuth } from '../utilities/use-data-api';
-import { fetchAuth } from '@utils/use-data-api';
+import { postAuth, fetchAuth } from '@utils/use-data-api';
 
 // import { thunk, computed, action, debug } from 'easy-peasy'; // 👈 import the hook
 
@@ -39,7 +38,8 @@ const extendSessonData = (res) => {
 export const login = async function (payload) {
   try {
     logit('loging in', payload);
-    var res = await postAuth('login', payload);
+    // var res = await postAuth('login', payload);
+    var res = await postAuth(payload);
     logit('login returning', res);
     res = extendSessonData(res);
     userStore.set(res);

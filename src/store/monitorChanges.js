@@ -12,7 +12,8 @@ let retry = 0;
 const createEvents = () => {
   // let events = new EventSource();
   // `localhost:4444/bookingsServer/monitorChanges?who=app${retry++}`,
-  let events = new EventSource(`/bookingsServer/monitorChanges?who=app${retry++}`);
+  const host = process.env.NODE_ENV === 'production' ? '' : 'http://localhost:4444';
+  let events = new EventSource(`${host}/bookingsServer/monitorChanges?who=app${retry++}`);
   events.onerror = (error) => {
     logit('error', error);
   };
@@ -24,7 +25,9 @@ const createEvents = () => {
     // if (id === 'bookingChange') refreshAccountBookings(data);
     // if (id === 'refreshMemberIndex') updateMemberIndex(data);
   };
-  events.addEventListener('test', (e) => console.log('test event', e));
+  events.addEventListener('test', (e) =>
+    console.log('test event', e.lastEventId, e.data),
+  );
   events.addEventListener('bookingChange', (e) => refreshAccountBookings(e.data));
   events.addEventListener('refreshMemberIndex', (e) => updateMemberIndex(e.data));
   events.addEventListener('refreshBookingCount', (e) => {

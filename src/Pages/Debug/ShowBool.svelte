@@ -1,50 +1,38 @@
 <script>
-  import { select, setChildrenState, getCount } from './debugSettings';
-  // import Logit from '@utils/logit.js';
-  import { createEventDispatcher } from 'svelte';
-
-  const dispatch = createEventDispatcher();
+  import { select, setNodeState } from './debugSettings';
   export let obj;
-  export let state;
-  export let logme = () => {};
-  // let logme = Logit(`debug/showBool`);
-  let className = $$props ?? '';
-  // const root = useStoreState((state) => state.debugSettings.nodes) as NodeMap;
 
-  // const changeSelect = useStoreActions(
-  //   (actions) => (actions.debugSettings as any).changeSelect,
-  // );
-  let stateName;
-  $: stateName = select[state] + ' ' + select[obj.derivedState];
+  export let logme = () => {};
+  let className = $$props ?? '';
+
+  $: stateName = select[obj.state] + ' ' + select[obj.derivedState];
   const onClick = () => {
-    state = state === select.YES ? select.NO : select.YES;
+    let state = obj.state === select.YES ? select.NO : select.YES;
     if (obj.leaf) obj.logit.active = state;
 
     logme('changeState', obj.id, select[state]);
 
-    obj = { ...setChildrenState(obj, state), ...getCount(obj, state) };
-    dispatch('childChanged', { id: obj.id, state });
+    setNodeState(obj.id, state);
   };
-
-  // $: logme('showBool', obj.id, obj.state, stateName, obj);
 </script>
 
 <div class={'bool ' + stateName + ' ' + className} on:click={onClick}>
   <span>
     <input
       type="checkbox"
-      indeterminate={state === select.SOME}
-      checked={state}
+      indeterminate={obj.state === select.SOME}
+      checked={obj.state}
       readOnly
     />{' '}
     {obj.name}
   </span>
   <span>
-    {obj.diff ?? '???'}
-    &nbsp;{select[obj.state]}
-    {#if !obj.leaf}
-      {obj.diff0 ?? '?'}
+    {select[obj.state]}
+    {#if obj.state === select.SOME}
       &nbsp;{select[obj.derivedState]}
+      {#if obj.derivedState === select.SOME}
+        &nbsp;{obj.diff}
+      {/if}
     {/if}
   </span>
 </div>

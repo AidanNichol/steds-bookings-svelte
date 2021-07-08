@@ -6,7 +6,7 @@
     "dev": "rollup -c -w",
     "testReport": "rollup -c -w testReport.js",
     "start": "sirv public",
-    "deploy": "node deploy.mjs"
+    "deploy": "node -r dotenv/config deploy.mjs"
   },
   "devDependencies": {
     "@rollup/plugin-alias": "^3.1.1",

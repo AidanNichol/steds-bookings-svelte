@@ -1,6 +1,6 @@
 {
   "name": "svelte-app",
-  "version": "3.0.2",
+  "version": "3.0.3",
   "scripts": {
     "build": "clear && yarn version --patch && rollup -c",
     "dev": "rollup -c -w",

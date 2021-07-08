@@ -1,16 +1,14 @@
 // todo convert to svelte
 //@ts-check
-import _ from 'lodash';
+import _, { cloneDeep } from 'lodash';
 import { writable, derived, get } from 'svelte/store';
 import { logitEnabledState } from '@utils/logitEnabledState.js';
 export { save } from '@utils/logitEnabledState.js';
 import Logit from '@utils/logit.js';
 let logBuild = Logit(`debug/buildTree`);
 let logmeC = Logit(`debug/setCurrentValues`);
-let logmeP = Logit(`debug/getCount`);
+let logmeP = Logit(`debug/setParentState`);
 let logmeE = Logit(`debug/enableString*`);
-
-// type select= true|false|undefined;
 
 export const select = {
   YES: true,
@@ -35,118 +33,86 @@ let timeoutId;
 export const enabledState = derived(
   debugSettings,
   ($debugSettings, set) => {
+    logmeE('pre', $debugSettings, get(logitEnabledState));
     if (timeoutId) {
       clearTimeout(timeoutId);
     }
     timeoutId = setTimeout(() => {
+      logmeE('prePost', $debugSettings, get(logitEnabledState));
       const active = [];
       const inactive = [];
       getEnableString($debugSettings, select.NO, active, inactive);
       logitEnabledState.set({ active, inactive });
       console.warn('enableState', { active, inactive }, get(logitEnabledState));
       set({ active, inactive });
-    }, 1000);
+    }, 500);
   },
   { active: [], inactive: [] },
 );
 
 export function getEnableString(node, inheritedState, active, inactive) {
-  logmeE('called', select[inheritedState], node.id, select[node?.state], node, {
-    active,
-    inactive,
-  });
   if (node === undefined) return;
+  let selCode = node?.id?.replaceAll('.', ':') + (node?.leaf ? '' : ':*');
   if (inheritedState === node.state) return;
-  let selCode = node.id + (node.leaf ? '' : ':*');
-  if (node.state === select.YES) return active.push(selCode);
-  if (node.state === select.NO) return inactive.push(selCode);
-  // node.state must be SOME
-  if (node.derivedState !== inheritedState && node.derivedState !== select.SOME) {
-    if (node.derivedState === select.YES) active.push(selCode);
-    else inactive.push(selCode);
-  }
-  inheritedState = node.derivedState ?? inheritedState;
   logmeE(
-    'string 1b',
-    selCode,
+    'called',
     node.id,
     select[inheritedState],
-    select[node.state],
-    select[node.derivedState],
-    { active, inactive },
+    selCode,
+    select[node?.state],
+    select[node?.dervidedState] ?? '',
   );
+  if (node.state === select.YES) active.push(selCode);
+  else if (node.state === select.NO) inactive.push(selCode);
+  else {
+    // node.state must be SOME
+    if (node.derivedState !== inheritedState) {
+      if (node.derivedState === select.YES) active.push(selCode);
+      if (node.derivedState === select.NO) inactive.push(selCode);
+    }
+    inheritedState = node.derivedState ?? inheritedState;
 
-  (node.children ?? []).forEach((child) =>
-    getEnableString(child, inheritedState, active, inactive),
-  );
-  logmeE('string 2', selCode, node.id, node.derivedState, { active, inactive });
+    (node.branches ?? []).forEach((child) =>
+      getEnableString(node[child], inheritedState, active, inactive),
+    );
+  }
+  logmeE('string 2', node.id, { active, inactive });
   return;
 }
-// export function getEnableString(node, inheritedState) {
-//   let enableString = '';
-//   // if (!root) return '';
-//   logmeE('called', select[inheritedState], node.id, select[node?.state], node);
-//   if (node === undefined) return '';
-//   if (inheritedState === node.state) return '';
-//   const generic = node.leaf ? '' : node.root ? '' : ':*';
-//   if (node.state === select.YES) return ' ' + node.id + generic;
-//   if (node.state === select.NO) return ' -' + node.id + generic;
-//   // node.state must be SOME
-//   if (node.derivedState !== inheritedState && node.derivedState !== select.SOME) {
-//     enableString = (node.derivedState === select.YES ? ' ' : ' -') + node.id + generic;
-//   } else enableString = '';
-//   // if (node.derivedState!==select.SOME && )
-//   inheritedState = node.derivedState ?? inheritedState;
-//   // parentDerivedState = parentDerivedState === select.YES ? select.NO : select.YES;
-//   logmeE(
-//     'string 1b',
-//     node.id,
-//     select[inheritedState],
-//     select[node.state],
-//     select[node.derivedState],
-//     enableString,
-//   );
+const branchMap = (node) => (node.branches ?? []).map((n) => node[n]);
 
-//   enableString = (node.children ?? []).reduce(
-//     (str, child) => str + getEnableString(child, inheritedState),
-//     enableString,
-//   );
-//   logmeE('string 2', node.id, node.derivedState, enableString);
-//   return enableString;
-// }
+// eslint-disable-next-line no-unused-vars
+export function setParentState({ derivedState, diff, ...node }) {
+  const len = (arr) => (arr ?? []).length;
+  const showCount = (c) => _.fromPairs(_.map(c, (v, k) => [select[k], len(v)]));
 
-export function getCount(node, newState) {
-  let diff = 0;
-  let diff0 = null;
-  logmeP('count -1', node, newState);
-  let state = (node.children || []).every((item) => item.state === newState)
-    ? newState
-    : select.SOME;
-  let derivedState = state;
-  logmeP('count 0', node.name, state, select[state], diff);
-  if (state !== select.SOME) {
-    diff = state === select.YES ? 1 : -1;
-    logmeP('count 1a', node.name, select[state], diff);
-  } else {
-    diff = node.children.reduce(
-      (res, child) => res + child.diff ?? (child.state ? 1 : -1),
-      0,
-    );
-    const someCount = node.children.filter((ch) => ch.state === select.SOME);
-    if (someCount === 0) {
-      if (node.children.length === diff) state = select.YES;
-      else if (node.children.length === -1 * diff) state = select.NO;
-      else state = select.SOME;
+  let count = _.groupBy(branchMap(node), (n) => n.state);
+  logmeP('count ' + node.id, showCount(count));
+
+  // all set to YES
+  if (!count[false] && !count[null]) node.state = select.YES;
+  // all set to NO
+  else if (!count[true] && !count[null]) node.state = select.NO;
+  else {
+    // mix of values so state must be SOME
+    node.state = select.SOME;
+    // deduce derviedState. State by redoing count using known derivedState
+    count = _.groupBy(branchMap(node), (n) => n.state ?? n.derivedState);
+    let someDiff = (count[null] ?? []).reduce((tot, n) => tot + n.diff, 0);
+    let diff = len(count[true]) - len(count[false]) + someDiff;
+    logmeP('count2 ' + node.id, showCount(count), diff);
+
+    const min = len(count[null]) > 0 ? 1 : 0;
+    if (diff > min) node.derivedState = select.YES;
+    else if (diff < -min) node.derivedState = select.NO;
+    else {
+      // no preference for dervideState. Return the diff to help our parent to decide
+      node.derivedState = select.SOME;
+      node.diff = diff;
     }
-
-    logmeP('count 1b', node.name, state, diff);
-    diff0 = diff;
-    if (Math.abs(diff) > 0) {
-      [derivedState, diff] = diff > 0 ? [select.YES, 1] : [select.NO, -1];
-    } else derivedState = select.SOME;
   }
-  logmeP('count 2', node.name, { state, diff, diff0, derivedState });
-  return { state, diff, diff0, derivedState };
+
+  return node;
 }
 
 /* 
@@ -159,119 +125,110 @@ export function buildTree(logitCodes) {
   logBuild('logitCodes', logitCodes);
 
   let root = {};
-  codes.forEach((code, i) => {
-    logBuild('code', code);
-    const tokens = code.split(':');
-    _.set(root, tokens.join('.'), {
+  codes.forEach((codeA, i) => {
+    let tokens = codeA.replace(/:\*/g, '').split(/[.:]/);
+    const code = tokens.join('.');
+    logBuild('code', code, codeA);
+
+    _.set(root, code, {
       i,
       id: code,
       name: _.last(tokens),
       leaf: true,
       state: select.NO,
-      diff: -1,
-      logit: logitCodes[code],
+      logit: logitCodes[codeA],
     });
   });
   logBuild('---- data1 -----', root);
-  root = setupTreeRoot(root);
+  root = setupTreeRoot(root, '', '');
+
   root.root = true;
   root.name = '*';
-  logBuild('---- data2 -----', root);
-  setCurrentValues(root);
-  root = { ...root, ...getCount(root) };
+  root.id = '*';
 
-  logBuild('---- data3 -----', root);
+  root = setCurrentValues(root);
+
+  logBuild('---- data4 -----', _.cloneDeep(root));
   const active = [],
     inactive = [];
   getEnableString(root, select.NO, active, inactive);
   logBuild('new enableState', { active, inactive });
-  // logmeE.active = false;
-  // root = updateTree(root, (tree) => ({ ...tree, ...getCount(tree) }));
   debugSettings.set(root);
 }
 /* 
 override the default values with the current setting
  */
 export function setCurrentValues(root) {
-  var savedEnableState = get(logitEnabledState);
-  logmeC('savedEnableState read', savedEnableState);
-  savedEnableState.active.forEach((name) => {
-    setCurrentValue(root, name.replace(/:\*/g, ''), select.YES);
+  const { active, inactive } = get(logitEnabledState);
+  let values = [
+    ...active.map((v) => [v.replace(/:\*/g, '').replace(/:/g, '.'), select.YES]),
+    ...inactive.map((v) => [v.replace(/:\*/g, '').replace(/:/g, '.'), select.NO]),
+  ];
+  values = _.sortBy(values, (v) => v[0]);
+  logmeC('savedEnableState read', active, inactive, values);
+  values.forEach(([name, value]) => {
+    root = setCurrentValue(root, name, value);
   });
-  savedEnableState.inactive.forEach((name) => {
-    setCurrentValue(root, name.replace(/:\*/g, ''), select.NO);
+  return root;
+}
+export function setNodeState(path, val) {
+  debugSettings.update((root) => {
+    return setCurrentValue(root, path, val);
   });
 }
-function setCurrentValue(root, name, val) {
-  const getBranch = (tree, name) => {
-    if (!tree) return [];
-    let index = (tree?.children ?? []).findIndex((b) => b.name === name);
-    if (index < 0) return [];
-    let res = tree.children[index];
-    logmeC('findBranch', tree, name, index, res);
-    return [res, `children[${index}]`];
-  };
-  logmeC('Processing', name, val);
+function setCurrentValue(root, path, val) {
+  logmeC('Processing', path, val, cloneDeep(root));
 
-  let [res, names] = name.split(/[.:]/).reduce(
-    ([node, names], name) => {
-      const [res, text] = getBranch(node, name);
-      if (!res) {
-        logmeC('no-res', text, res);
-        return [];
-      }
-      return [res, [...names, text]];
-    },
-    [root, []],
-  );
-  if ((names?.length ?? 0) === 0) {
-    logmeC('not Found', res, names, name);
-    return;
-  }
-  let path = names.join('.');
-  let tree = _.get(root, path);
-  logmeC('setIndex', name, select[val], path, tree);
+  let tree = path && path !== '*' ? _.get(root, path) : root;
+  logmeC('setIndex', select[val], path, cloneDeep(tree));
   tree = setChildrenState(tree, val);
-  logmeC('setIndex2', name, select[val], path, tree);
+  logmeC('setIndex2', select[val], path, cloneDeep(tree));
+  if (path === '*') return tree;
   _.set(root, path, tree);
-  while (names.length > 0) {
-    let path = names.join('.');
-    let tree = _.get(root, path);
-    logmeC('setCount--', name, path, tree);
-    _.set(root, path, { ...tree, ...getCount(tree, val) });
-    names.pop();
+  while (path) {
+    path = path.match(/(.*)[.]/)?.[1];
+    let tree = path ? _.get(root, path) : root;
+    logmeC('setCount--', path, cloneDeep(tree));
+    tree = setParentState(tree);
+    root = path ? _.set(root, path, tree) : tree;
+    logmeC('setCount-2', path, cloneDeep(root));
   }
+  return root;
 }
-export function setupTreeRoot(tree, names = []) {
+let bbj = 0;
+export function setupTreeRoot(tree, path, name) {
+  if (bbj++ > 100) return tree;
   if (tree.leaf) return tree;
-  const children = _.toPairs(tree).map(([key, value]) =>
-    setupTreeRoot(value, [...names, key]),
-  );
-  logBuild('setupTreeRoot', names, tree, children);
-  return {
-    children,
+  const branches = _.keys(tree);
+  path = name && path ? `${path}.${name}` : path + name;
+  logBuild('setupTreeRoot 1', { path, name }, tree, branches);
+  branches.forEach((key) => (tree[key] = setupTreeRoot(tree[key], path, key)));
+  logBuild('setupTreeRoot 2', { path, name }, tree, branches);
+  const ret = {
+    ...tree,
+    branches,
     state: select.NO,
-    diff: -1,
-    name: _.last(names) ?? '*',
-    id: names.join(':') || '*',
+    name: name,
+    id: path,
   };
+  logBuild('setupTreeRoot 3', { path, name }, _.cloneDeep(ret));
+  return ret;
 }
-export function updateTree({ children, ...tree }, fn) {
+export function walkTree(tree, fn) {
   if (tree.leaf) return fn(tree);
-  return {
-    children: (children ?? []).map((value) => updateTree(value, fn)),
-    ...fn(tree),
-  };
+  let nodes = {};
+  (tree?.branches ?? []).forEach((key) => (nodes[key] = walkTree(tree[key], fn)));
+  return { ...fn(tree), ...nodes };
 }
 
 export function setChildrenState(tree, state) {
-  const diff = state ? 1 : -1;
-  const derivedState = state;
-  const setState = (tree) => {
+  const setState = ({ ...tree }) => {
     if (tree.leaf && !tree.logit) console.warn('mismatch', tree.id, tree);
-    if (tree.leaf) tree.logit.active = state;
-    return tree.state === state ? tree : { ...tree, state, derivedState, diff };
+    if (tree.leaf && tree.logit) tree.logit.active = state;
+    tree.state = state;
+    delete tree.derivedState, tree.diff;
+    return tree;
   };
 
-  return updateTree(tree, setState);
+  return walkTree(tree, setState);
 }

@@ -18,6 +18,7 @@
   "rules": {},
   "globals": {
     "__filename": true,
-    "__dirname": true
+    "__dirname": true,
+    "process": true
   }
 }

@@ -1,5 +1,5 @@
 <script>
-  import { currentMemberId } from '@store/memberCurrent.js';
+  import { currentMemberId, setCurrentMemberId } from '@store/memberCurrent.js';
   import { sortedListSlice } from '@store/membersIndex';
 
   import Logit from '@utils/logit';
@@ -18,7 +18,7 @@
 
   var list = [];
   const selectMember = (id) => {
-    currentMemberId.set(id);
+    setCurrentMemberId(id);
     logit('member selected', id);
   };
 

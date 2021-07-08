@@ -30,15 +30,15 @@
 
   import Logit from '@utils/logit';
   var logit = Logit('pages/members/EditMemberData');
-  let lastMemId = '';
+  let lastrefreshCount = '';
 
   let refresh = false;
 
-  $: if ($member.memberId !== lastMemId) {
+  $: if ($member.refreshCount !== lastrefreshCount) {
     formFields.set({ ...$member });
-    lastMemId = $member.memberId;
+    lastrefreshCount = $member.refreshCount;
     refresh = true;
-    logit('setData', lastMemId, $formFields, $member);
+    logit('setData', lastrefreshCount, $formFields, $member);
   }
 
   const reset = () => formFields.set({ ...$member });

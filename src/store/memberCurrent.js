@@ -43,6 +43,10 @@ export const editMode = writable(false);
 export const newMember = writable(false);
 export const viewCount = writable(0);
 export const currentMemberId = writable('');
+export const setCurrentMemberId = (memberId) => {
+  currentMemberId.set(memberId);
+  memberStale.set(true);
+};
 const nextMemberState = writable(null);
 let newMemberData = {};
 export const createNewMember = () => {
@@ -52,21 +56,26 @@ export const createNewMember = () => {
   editMode.set(true);
 };
 const memberStale = writable(true);
+
+export const refreshMemberData = (data) => {
+  let { memberId } = data;
+  logit('refreshMember', get(currentMemberId), memberId);
+  if (get(currentMemberId) === memberId) memberStale.set(true);
+};
+let refreshCount = 0;
 export const currentMemberData = derived(
-  [currentMemberId, nextMemberState, newMember],
-  async ([$currentMemberId, $nextMemberState, $newMember], set) => {
-    if ($nextMemberState && $nextMemberState.memberId === $currentMemberId) {
-      set($nextMemberState);
-      return;
-    }
+  [currentMemberId, memberStale, newMember],
+  async ([$currentMemberId, $memberStale, $newMember], set) => {
     if ($newMember) {
       set(newMemberData);
       return;
     }
+    if (!$memberStale) return;
     if ($currentMemberId) {
       const res = await fetchData('member/memberData/' + $currentMemberId);
       logit('member fetchdata returned', $currentMemberId, res);
-      nextMemberState.set(res);
+      memberStale.set(false);
+      res.refreshCount = refreshCount++;
       set(res);
     } else logit('no member');
   },

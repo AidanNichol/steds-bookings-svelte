@@ -1,8 +1,8 @@
 {
   "name": "svelte-app",
-  "version": "3.0.1-83",
+  "version": "3.0.1",
   "scripts": {
-    "build": "clear && yarn version --prerelease && rollup -c",
+    "build": "clear && yarn version --patch && rollup -c",
     "dev": "rollup -c -w",
     "testReport": "rollup -c -w testReport.js",
     "start": "sirv public",

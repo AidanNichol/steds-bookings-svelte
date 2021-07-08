@@ -34,6 +34,8 @@ const loadBookingCount = async () => {
   // }, 10000);
 };
 export function refreshedBookingStatus(data) {
+  data = Object.values(data);
+
   status.set(data);
 }
 

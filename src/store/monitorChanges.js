@@ -2,12 +2,13 @@
 
 // import { fetchData } from '@utils/use-data-api';
 import { refreshAccountBookings } from './accountStatus.js';
+import { refreshedBookingStatus } from './walkBookingStatus';
 import { updateMemberIndex } from './membersList';
+import { refreshMemberData } from './memberCurrent.js';
 import Logit from '@utils/logit';
 
 var logit = Logit('store/monitorChanges');
 
-import { refreshedBookingStatus } from './walkBookingStatus';
 let retry = 0;
 const createEvents = () => {
   // let events = new EventSource();
@@ -21,19 +22,21 @@ const createEvents = () => {
     let { lastEventId: id, data, type } = e;
     data = JSON.parse(data);
     logit('monitorChanges event', { id, data, type }, e);
-    // if (id === 'refreshBookingCount') refreshedBookingStatus(Object.values(data));
-    // if (id === 'bookingChange') refreshAccountBookings(data);
-    // if (id === 'refreshMemberIndex') updateMemberIndex(data);
   };
   events.addEventListener('test', (e) =>
     console.log('test event', e.lastEventId, e.data),
   );
-  events.addEventListener('bookingChange', (e) => refreshAccountBookings(e.data));
-  events.addEventListener('refreshMemberIndex', (e) => updateMemberIndex(e.data));
-  events.addEventListener('refreshBookingCount', (e) => {
-    logit('monitorChanges refreshBookingCount', e.id, e.data, e);
-    refreshedBookingStatus(Object.values(e.data));
-  });
+  const genListener = (fn) => {
+    return (e) => {
+      let data = JSON.parse(e.data);
+      logit('event', e.type, data);
+      fn(data);
+    };
+  };
+  events.addEventListener('bookingChange', genListener(refreshAccountBookings));
+  events.addEventListener('memberChange', genListener(refreshMemberData));
+  events.addEventListener('refreshMemberIndex', genListener(updateMemberIndex));
+  events.addEventListener('refreshBookingCount', genListener(refreshedBookingStatus));
   return events;
 };
 createEvents();

@@ -30,8 +30,8 @@
   const clss = (member) => {
     let subsStatus = member.suspended ? 'suspended' : member.subsStatus.status;
 
-    let current = $currentMemberId === member.memberId ? 'current' : '';
-    return `list-line ${member.memberStatus} ${current} ${subsStatus}`;
+    // let current = $currentMemberId === member.memberId ? 'current' : '';
+    return `list-line ${member.memberStatus}  ${subsStatus}`;
   };
   $: logit('list', list);
   $: logit('memberId', $currentMemberId);
@@ -39,7 +39,11 @@
 
 <div class="list">
   {#each $sortedListSlice as member}
-    <div class={clss(member)} on:click={() => selectMember(member.memberId)}>
+    <div
+      class={clss(member)}
+      class:current={$currentMemberId === member.memberId}
+      on:click={() => selectMember(member.memberId)}
+    >
       <span class="line-name">
         <span class="id">{member.memberId.substr(1)}</span>
         <span class="name">{member.lastName + ', ' + member.firstName}</span>

@@ -1,6 +1,6 @@
 import ftp from 'basic-ftp';
 import logUpdate from 'log-update';
-
+import getenv from 'getenv';
 example();
 
 async function example() {
@@ -22,7 +22,7 @@ async function example() {
     await client.access({
       host: 'ftp.stedwardsfellwalkers.co.uk',
       user: 'vscode@stedwardsfellwalkers.co.uk',
-      password: 'SN5eaR!434QM5cmx',
+      password: getenv('FTPPASSWORD'),
       secure: true,
       port: 21,
       secureOptions: { servername: 'ukhost4u.com' },

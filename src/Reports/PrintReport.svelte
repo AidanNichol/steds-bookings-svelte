@@ -9,15 +9,17 @@
 </script>
 
 {#if $displayReport && $reportComponent}
-  <!-- <section class="printHeader buttons">
-    <button on:click={() => window.print()} class="print">print</button>
-    <div class="closeContainer">
-      <button on:click={() => displayReport.set(false)} class="close" />
-    </div>
-  </section> -->
-  <!-- <section class="printWindow"> -->
-  <svelte:component this={$reportComponent} {...$reportProps} />
-  <!-- </section> -->
+  <div class="page">
+    <section class="printHeader buttons">
+      <button on:click={() => window.print()} class="print">print</button>
+      <div class="closeContainer">
+        <button on:click={() => displayReport.set(false)} class="close" />
+      </div>
+    </section>
+    <section class="printWindow">
+      <svelte:component this={$reportComponent} {...$reportProps} />
+    </section>
+  </div>
 {/if}
 
 <style>
@@ -25,20 +27,31 @@
     margin: 1cm;
     size: A4;
   }
-  /* .printHeader {
-    position: sticky;
-    display: none;
+  .page {
+    height: 100%;
+    display: grid;
+    grid-template-rows: 50px minmax(0, 1fr);
+  }
+  .printHeader {
+    /* position: sticky;
+    display: none; */
     top: 0;
   }
+  .printWindow {
+    overflow: scroll;
+  }
   @media print {
-    .printHeader {
+    .page {
+      display: block;
+    }
+    .printHeader.buttons {
       display: none;
     }
+    .printWindow {
+      overflow: visible;
+    }
   }
-  .printFooter {
-    position: sticky;
-    bottom: 0;
-  }
+
   .buttons {
     display: flex;
     flex-direction: row;
@@ -122,5 +135,5 @@
   .close:focus,
   .close:active {
     outline: none;
-  } */
+  }
 </style>

@@ -51,7 +51,7 @@
   // Create Document Component
   onMount(async () => {
     console.time('read');
-    const resp = await fetchData(`allMembers`);
+    const resp = await fetchData(`member/allMembers`);
     console.timeEnd('read');
     logit('allMembers fetchData returned', resp);
     if ((resp?.length ?? 0) <= 0) return null;

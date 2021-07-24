@@ -46,13 +46,6 @@
     ),
   );
 
-  // const logClasses = (log) =>
-  //   ['ruleAfter', 'historic', 'balance'].filter((n) => log[n]).join(' ');
-
-  // const amount = (log) => {
-  //   const refund = log.refundId && log.req.length === 1 ? '*' : ' ';
-  //   return sprintf(`%2d%s`, log.amount, refund);
-  // };
   const resetLate = (booking) => {
     const { memberId, walkId } = booking;
     applyBookingChange({ walkId, memberId, req: 'BX' });
@@ -95,7 +88,7 @@
       </div>
       <div class="bookings">
         {#each mBookings as booking}
-          <div class="booking">
+          <div class="booking" class:hoverable={booking.BookingLogs.length > 1}>
             {#if booking.BookingLogs.length > 1}
               <div class="fullBookings">
                 {#each booking.BookingLogs.slice(0, -1) as log}
@@ -235,8 +228,8 @@
     left: -15px;
     display: inline-block;
   }
-  .booking:hover .uparrow {
-    display: none;
+  .booking.hoverable:hover .uparrow {
+    opacity: 0;
   }
   .booking {
     position: relative;
@@ -244,10 +237,10 @@
   .booking .fullBookings {
     display: none;
   }
-  .booking:hover {
+  .booking.hoverable:hover {
     border: thin black double;
   }
-  .booking:hover .fullBookings {
+  .booking.hoverable:hover .fullBookings {
     display: block;
     /* position: relative; */
     z-index: 10;

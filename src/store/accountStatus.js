@@ -3,7 +3,7 @@ import { fetchData } from '@utils/use-data-api';
 import { produceWithPatches, enablePatches } from 'immer';
 import { nameIndex } from './nameIndex.js';
 import { bookingChange, annotateBooking, paymentReceived } from './fundsManager';
-
+import { format, addDays } from 'date-fns';
 import { currentMemberId } from './memberCurrent';
 import { addToQueue as addToPatchesQueue } from './patches';
 
@@ -102,7 +102,8 @@ export const refreshAccountBookings = (data) => {
 export const getStartDate = async () => {
   const res = await fetchData(`walk/firstBooking`);
   logit('getStartDate fetchData returned', res);
-  const { firstBooking } = res;
+  let { firstBooking } = res || {};
+  if (!firstBooking) firstBooking = format(addDays(new Date(), -45), 'yyyy-MM-dd');
   startDate.set(firstBooking);
   return firstBooking;
 };

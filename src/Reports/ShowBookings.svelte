@@ -39,6 +39,7 @@
     width: auto;
     border-bottom-left-radius: 3px;
     background-color: #f0f0f0;
+    margin-top: 0.5em;
   }
   .member {
     /* font-size: 16.1px; */

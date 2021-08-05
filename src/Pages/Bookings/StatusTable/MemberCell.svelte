@@ -1,6 +1,8 @@
 <script>
   // import StatusCell from './StatusCell.svelte';
   import { getSubsStatus } from '@store/memberCurrent';
+  import Logit from '@utils/logit';
+  var logit = Logit('pages/bookings/statusTable/MemberCell');
   export let member;
   // let memD;
   let name;
@@ -12,6 +14,7 @@
     name = member.firstName;
     let { showState } = getSubsStatus(member);
     delS = delSettings[showState];
+    logit('delS', name, suspended, showState, delS);
   }
 
   const delSettings = {

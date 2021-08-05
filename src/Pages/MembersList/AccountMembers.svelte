@@ -32,13 +32,13 @@
   let thisAccount = {};
   let extraMembers = [];
   $: {
-    let thisAccount = $nameIndex.get($member.accountId);
-    logit('thisAccount', thisAccount);
+    // let thisAccount = $nameIndex.get($member.accountId);
+    // logit('thisAccount', thisAccount);
     extraMembers =
-      $member.Account?.Members?.filter(
-        (mem) => mem.memberId !== $member.memberId,
-      )?.map(({ memberId, fullName }) => [memberId, fullName]) ?? [];
-    logit('extraMembers', extraMembers);
+      $member.Account?.Members?.filter((mem) => mem.memberId !== $member.memberId)?.map(
+        ({ memberId, fullName }) => [memberId, fullName],
+      ) ?? [];
+    // logit('extraMembers', extraMembers);
   }
 
   const reset = () => {

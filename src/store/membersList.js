@@ -17,6 +17,10 @@ export const loadMembers = async () => {
 };
 export function updateMemberIndex(data) {
   const { memberId } = data;
+  if (!memberId) {
+    loadMembers();
+    return;
+  }
   data.id = memberId;
   logit('updating', memberId, data);
   membersList.update((state) => _.uniqBy([data, ...state], 'memberId'));

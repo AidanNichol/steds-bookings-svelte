@@ -10,7 +10,7 @@
 
   const linesNeeded = (list) => {
     const len = (list || []).length;
-    return len === 0 ? len : len + 1;
+    return len === 0 ? len : len + 2;
   };
   const getBookingsByType = (walk, type) => {
     return walk.Bookings.filter((bk) => bk.status === type);
@@ -27,18 +27,18 @@
     const wait = getByType(walk, 'W', 'updatedAt');
     const colSize = 56;
     const otherSize = linesNeeded(car) + linesNeeded(wait);
-    const busSize = linesNeeded(bus) + 1;
-    const noCols = busSize + otherSize > colSize ? 2 : 1;
-    logit('parseWalk', { bus, car, wait, noCols, walk });
-    return {
-      walk,
-      width: 2,
-      noCols,
-      cols: [
+    const busSize = linesNeeded(bus);
+    let noCols = 1,
+      cols = [{ bus, car, wait, walk }];
+    if (busSize + otherSize > colSize) {
+      noCols = 2;
+      cols = [
         { bus, walk },
         { car, wait, walk },
-      ],
-    };
+      ];
+    }
+    logit('parseWalk', { cols, noCols, walk });
+    return { walk, cols, noCols };
   };
 
   const parseWalksIntoPages = (bookableWalks) => {
@@ -107,7 +107,7 @@
                   {#if bus}
                     <ShowBookings members={bus} />
                     {#if walk}
-                      <div>{'Seats available: ' + free(walk, bus)}</div>
+                      <div class="available">{'Seats available: ' + free(walk, bus)}</div>
                     {/if}
                   {/if}
                   {#if wait}
@@ -141,6 +141,11 @@
     /* background-color: yellow; */
   }
 
+  .available {
+    font-style: italic;
+    font-weight: bold;
+    padding-top: 0.3em;
+  }
   .colStyle {
     display: grid;
     grid-template-columns: repeat(var(--colsPerPage), 1fr);

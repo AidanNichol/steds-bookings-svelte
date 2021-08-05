@@ -59,6 +59,7 @@ const memberStale = writable(true);
 
 export const refreshMemberData = (data) => {
   let { memberId } = data;
+  newMember.set(false);
   logit('refreshMember', get(currentMemberId), memberId);
   if (get(currentMemberId) === memberId) memberStale.set(true);
 };
@@ -75,7 +76,7 @@ export const currentMemberData = derived(
       const res = await fetchData('member/memberData/' + $currentMemberId);
       logit('member fetchdata returned', $currentMemberId, res);
       memberStale.set(false);
-      res.refreshCount = refreshCount++;
+      res.refreshCount = ++refreshCount;
       set(res);
     } else logit('no member');
   },
@@ -113,11 +114,14 @@ export const isPaidUp = (m) =>
 export const memberSubsStatus = derived(formFields, ($mem) => getSubsStatus($mem));
 export const getSubsStatus = (mem) => {
   const subsStatus = getSubsStatusBasic(mem);
+  logit('basicSubsStatus', subsStatus, mem);
   const deleteState = mem.deleteState;
   let showState = subsStatus.status === 'ok' ? '' : subsStatus.status.toUpperCase()[0];
   if (deleteState >= 'S') showState = deleteState;
+  if (mem.memberStatus === 'Deceased') showState = 'deceased';
+
   if (!isPaidUp(mem)) showState = 'lapsed';
-  if (deleteState === 'D') showState = 'died';
+  if (deleteState === 'D') showState = 'deceased';
   subsStatus.showState = showState;
   // susbsStatus.paidUp=m?.memberStatus !== 'Member' || m?.subscription >= subsYear;
   subsStatus.paidUp = !subsStatus.showSubsButton;
@@ -131,6 +135,9 @@ const getSubsStatusBasic = (mem) => {
   let status = 'ok';
   if (mem.memberStatus === 'HLM') {
     return { due: false, status, showSubsButton: false };
+  }
+  if (mem.memberStatus === 'Deceased') {
+    return { due: false, status: 'deceased', showSubsButton: false };
   }
   if (mem.memberStatus === 'Guest') {
     return { due: false, status: 'guest', showSubsButton: false };
@@ -213,17 +220,18 @@ export const updateMember = (payload) => {
   logit('dispatchPayload', payload);
   const memberData = get(currentMemberData);
   const memberId = memberData.memberId;
-  const [nextState, ...patches] = produceWithPatches(memberData, (draft) => {
-    const newMember = memberData.newMember;
-    const when = getTimestamp();
-    const why = newMember ? 'Create' : 'Update';
-    draft.lastAction = [when, memberId, why, JSON.stringify(payload)];
+  const [nextState, ...patches] = produceWithPatches(
+    newMember ? {} : memberData,
+    (draft) => {
+      const when = getTimestamp();
+      const why = 'Update';
+      draft.lastAction = [when, memberId, why, JSON.stringify(payload)];
 
-    Object.values(payload).forEach(([field, value]) => {
-      draft[field] = value;
-    });
-  });
-  // if (newMember) return payload;
+      Object.values(payload).forEach(([field, value]) => {
+        draft[field] = value;
+      });
+    },
+  );
   logit('patches', nextState, patches);
   patches.forEach((g) =>
     g.forEach((p) => {
@@ -239,11 +247,47 @@ export const updateMember = (payload) => {
   addToPatchesQueue(patches);
   nextMemberState.set(nextState);
 };
+export const deleteCurrentMember = (delAccount) => {
+  const memberData = get(currentMemberData);
+  const memberId = memberData.memberId;
+  logit('deleteCurentMember', memberId, delAccount);
+  const patch = {
+    op: 'del',
+    path: ['Member', memberId],
+    value: delAccount ? memberData.accountId : null,
+  };
+
+  // editMode.set(false);
+  // newMember.set(false);
+
+  addToPatchesQueue([[patch], []]);
+  setCurrentMemberId(null);
+};
+export const addMember = (payload) => {
+  logit('addPayload', payload);
+  const { memberId, accountId, firstName, lastName } = payload;
+  logit('memberData', { accountId, firstName, lastName });
+  const accountData = {
+    accountId,
+    name: `${firstName} ${lastName}`,
+    sortName: `${lastName}, ${firstName}`,
+  };
+  const patch = { op: 'add', path: ['Member', memberId], value: payload };
+  const patchA = { op: 'add', path: ['Account', accountId], value: accountData };
+
+  editMode.set(false);
+  // newMember.set(false);
+
+  logit('patches', [[patch, patchA], []]);
+  addToPatchesQueue([[patch, patchA], []]);
+  nextMemberState.set(payload);
+};
 const buildNewMember = () => {
   const memNo =
     get(membersList).reduce((max, mem) => Math.max(max, mem.memberId.substr(1)), 0) + 1;
   const memberId = 'M' + memNo;
   const newMem = {
+    ...initialState,
     memberId: memberId,
     accountId: 'A' + memNo,
     firstName: '',

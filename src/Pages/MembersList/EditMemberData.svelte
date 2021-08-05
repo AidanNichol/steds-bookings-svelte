@@ -9,6 +9,8 @@
     formFields,
     viewCount,
     updateMember,
+    addMember,
+    deleteCurrentMember,
     currentMemberId as memberId,
   } from '@store/memberCurrent.js';
   import AccountMembers from './AccountMembers.svelte';
@@ -31,22 +33,24 @@
   import Logit from '@utils/logit';
   var logit = Logit('pages/members/EditMemberData');
   let lastrefreshCount = '';
+  let lastMemberId = null;
 
   let refresh = false;
 
-  $: if ($member.refreshCount !== lastrefreshCount) {
+  $: if ($member.refreshCount !== lastrefreshCount || lastMemberId !== $member.memberId) {
     formFields.set({ ...$member });
     lastrefreshCount = $member.refreshCount;
     refresh = true;
+    lastMemberId = $member.memberId;
     logit('setData', lastrefreshCount, $formFields, $member);
   }
 
   const reset = () => formFields.set({ ...$member });
 
-  const parseMemberData = (member) => ({
-    ...member,
-    roles: (member.roles ?? '').split(/, */),
-  });
+  // const parseMemberData = (member) => ({
+  //   ...member,
+  //   roles: (member.roles ?? '').split(/, */),
+  // });
 
   // let deleteable = true;
   // const thisYear = todaysDate().substr(0, 4);
@@ -64,22 +68,24 @@
   //   logit('bookingState', bookingState, deleteable);
   // }
 
-  if (member?.memberId && member?.memberId !== currMemberId.current) {
-    logit('about to initialize', memberId, member, currMemberId);
-    currMemberId.current = memberId;
-    viewCount.set($viewCount + 1);
-    initializeData(parseMemberData(member));
-  }
+  // if ($member?.memberId && $member?.memberId !== currMemberId.current) {
+  //   logit('about to initialize', memberId, member, currMemberId);
+  //   currMemberId.current = memberId;
+  //   viewCount.set($viewCount + 1);
+  //   initializeData(parseMemberData(member));
+  // }
 
   const saveChanges = () => {
     const changes = getDirty();
-    logit('saveChanges', changes, $isDirty, member);
-    if (member.newMember) updateMember({ ...member, ...changes });
-
-    if (changes.roles) {
-      changes.roles = changes.roles.map((r) => r.value).join(', ');
+    logit('saveChanges', changes, $isDirty, $member);
+    // if ($member.newMember) updateMember({ ...$member, ...changes });
+    if ($member.newMember) addMember($formFields);
+    else {
+      if (changes.roles) {
+        changes.roles = changes.roles.map((r) => r.value).join(', ');
+      }
+      updateMember(changes);
     }
-    updateMember(changes);
     editMode.set(false);
   };
 
@@ -92,10 +98,11 @@
   };
   const deleteMember = () => {
     editMode.set(false);
-    const { memberId, accountId, fullName } = member;
-    logit('deleteMember', memberId, accountId.accountId, fullName);
-    // MS.deleteCurrentMember();
-    memberId.set(undefined);
+    const { memberId, accountId, fullName } = $member;
+    const delAccount = $member.Account?.Members?.length === 1;
+    logit('deleteMember', memberId, accountId, fullName, delAccount);
+    deleteCurrentMember(delAccount);
+    // memberId.set(undefined);
   };
 
   const getShowState = (subsStatus, deleteState, paidUp) => {
@@ -122,6 +129,7 @@
         S: { 'data-text': 'Suspended', style: "--color: orange;--opacity': 0.3" },
         X: { 'data-text': 'Delete Me', style: "--color: red;--opacity': 0.5" },
       }[$subsStatus.showState] || {};
+    logit('subsStatus', $subsStatus, delSettings);
   }
   let setValue = (field, value) =>
     formFields.update((state) => ({ ...state, [field]: value }));
@@ -190,7 +198,6 @@
   };
   const currentRoles = (role) => {
     let roles = (role ?? '').split(/, */).filter((r) => r.length > 0);
-    logit('currentRoles', roles);
     return roles.length > 0 ? roles : [];
   };
   const setEditMode = () => {
@@ -203,6 +210,7 @@
     { value: 'Member', label: 'Member' },
     { value: 'Guest', label: 'Guest' },
     { value: 'HLM', label: 'Honary Life Member' },
+    { value: 'Deceased', label: 'Deceased' },
   ];
 </script>
 

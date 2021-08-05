@@ -44,19 +44,19 @@ export const datetimePrevSec = (oldDate, inc = -1) => {
 
 export const todaysDate = () => {
   let tdy = new Date();
-  tdy = parseISO('2020-03-18');
+  // tdy = parseISO('2020-03-18');
   return formatDate(tdy);
 };
 export const now = () => {
   let tdy = formatDateTime(new Date());
   // tdy = setDay(setMonth(tdy, 3), 18);
-  tdy = '2020-03-18' + tdy.substr(10);
+  // tdy = '2020-03-18' + tdy.substr(10);
   return tdy;
 };
 
 export const today = () => {
   let tdy = new Date();
-  tdy = parseISO('2020-03-18');
+  // tdy = parseISO('2020-03-18');
   return formatDate(tdy);
 };
 export const currentSubsYear = () => {

@@ -94,7 +94,10 @@ export const totalDebt = derived(debts, ($payload) =>
 */
 
 let paymentsData = [];
-export const clearPaymentsMade = () => (paymentsData = []);
+export const clearPaymentsMade = () => {
+  paymentsData = [];
+  stalePayments.set(true);
+};
 export const paid = derived(
   [stalePayments, names, loaded],
   async ([$stalePayments, $names, $loaded], set) => {
@@ -139,14 +142,20 @@ export const totalPaid = derived(paid, ($payload) =>
     ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ 
 */
 let creditsData = [];
-export const credits = derived(staleCredits, async ($staleCredits, set) => {
-  if (!$staleCredits) return set(creditsData);
-  creditsData = await fetchData(`Payment/creditsOwed`);
-  logit('fetchData returned', creditsData);
-  set(creditsData);
-  $staleCredits.set(false);
-});
+export const credits = derived(
+  staleCredits,
+  async ($staleCredits, set) => {
+    if (!$staleCredits) return set(creditsData);
+    creditsData = await fetchData(`account/creditsOwed`);
+    logit('fetchData returned', creditsData);
+    set(creditsData);
+    $staleCredits.set(false);
+  },
+  [],
+);
 
-export const totalCredit = derived(credits, ($payload) =>
-  $payload.reduce((tot, a) => tot + a.balance, 0),
+export const totalCredit = derived(
+  credits,
+  ($credits) => $credits.reduce((tot, a) => tot + a.balance, 0),
+  0,
 );

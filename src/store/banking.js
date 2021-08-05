@@ -1,13 +1,8 @@
 import { fetchData } from '@utils/use-data-api';
 import { getTimestamp } from '@utils/dateFns';
 import { writable, get } from 'svelte/store';
-import {
-  paid,
-  clearPaymentsMade,
-  totalCredit as closingCredit,
-  totalDebt as closingDebt,
-  totalPaid as bankedAmount,
-} from './payments';
+import { clearPaymentsMade } from './payments';
+
 import { addToQueue } from './patches.js';
 
 import Logit from '@utils/logit';
@@ -25,14 +20,14 @@ export const getLatestBanking = async () => {
   latestBanking.set(res);
   logit('latestBanking', get(latestBanking));
 };
-export const bankMoney = async () => {
+export const bankMoney = async (paid, paidTotal, totalDebt, totalCredit) => {
   const latest = get(latestBanking);
   const timeS = getTimestamp();
   const newBanking = {
     bankingId: 'BP' + timeS,
-    bankedAmount,
-    closingDebt,
-    closingCredit,
+    bankedAmount: paidTotal,
+    closingDebt: totalDebt,
+    closingCredit: totalCredit,
     openingCredit: latest.closingCredit,
     openingDebt: latest.closingDebt,
     endDate: timeS,
@@ -50,8 +45,8 @@ export const bankMoney = async () => {
     );
   });
 
+  logit('bankMoney patches', patches);
   addToQueue([patches, [{}]]);
-  logit('bankMoney', patches);
   latestBanking.set(newBanking);
   clearPaymentsMade();
 };

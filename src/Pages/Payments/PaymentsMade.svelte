@@ -1,5 +1,6 @@
 <script>
   /* jshint quotmark: false */
+  import { onMount } from 'svelte';
   import Panel from '@utils/AJNPanel.svelte';
   import TooltipButton from '@utils/TooltipButton.svelte';
   import PaymentsSummaryReport from '@reports/PaymentsSummaryReport.svelte';
@@ -10,7 +11,14 @@
   // eslint-disable-next-line no-unused-vars
   import Notes20a from '@images/pound-banknote_1f4b7.png';
   import Notes20 from '@images/banknote-with-pound-sign_1f4b7.png';
-  import { paid as paymentsMade, totalPaid } from '@store/payments';
+  import {
+    paid as paymentsMade,
+    totalPaid,
+    totalDebt,
+    totalCredit,
+    credits,
+    setStale,
+  } from '@store/payments';
   import { latestBanking as banking, bankMoney, showBanking } from '@store/banking';
   import { page } from '@store/router';
   import { currentMemberId } from '@store/memberCurrent';
@@ -21,21 +29,29 @@
     booking.activeThisPeriod && !(booking.paid && booking.paid.P > 0);
 
   export let toggleDisplay;
-
+  logit('loaded', true);
   // const [showBanking, setShowBanking] = useState(false);
 
   $: logit('hooky stuff', $paymentsMade, $banking, $showBanking);
   // if (!banking) return null;
-  let startDate;
+  let startDate, closingDebt, closingCredit, allCredits;
   $: if ($banking) startDate = dispDate($banking?.endDate);
+  $: {
+    closingDebt = $totalDebt;
+    closingCredit = $totalCredit;
+    allCredits = $credits;
+    logit('closing', { closingCredit, closingDebt, allCredits });
+  }
+  $: logit('filtered accounts', $paymentsMade);
 
-  logit('filtered accounts');
-
-  logit('accs', paymentsMade);
+  $: logit('accs', $paymentsMade);
   const showMemberBookings = (memberId) => {
     currentMemberId.set(memberId);
     page.set('bookings');
   };
+  onMount(async () => {
+    setStale(true);
+  });
 </script>
 
 <Panel class="paymentsMade " style="max-height: 100%;">
@@ -59,8 +75,7 @@
         <TooltipButton
           placement="bottom"
           onClick={() => {
-            // setReport(PaymentsSummaryReport, null, 'Payments Received');
-            bankMoney($paymentsMade, $totalPaid);
+            bankMoney($paymentsMade, $totalPaid, closingDebt, closingCredit);
           }}
           tiptext="Bank the money and start new period"
           visible={$showBanking}

@@ -1,12 +1,13 @@
 {
   "name": "svelte-app",
-  "version": "3.0.17",
+  "version": "3.0.18",
   "scripts": {
     "build": "clear && yarn version --patch && rollup -c",
     "dev": "rollup -c -w",
     "testReport": "rollup -c -w testReport.js",
     "start": "sirv public",
-    "deploy": "node -r dotenv/config deploy.mjs"
+    "deploy": "node -r dotenv/config deploy.mjs",
+    "testpdf": "clear&&nodemon ./src/ReportsPdf/createSummaryPdf.mjs"
   },
   "devDependencies": {
     "@rollup/plugin-alias": "^3.1.1",
@@ -22,8 +23,10 @@
     "eslint-config-prettier": "^7.1.0",
     "eslint-plugin-prettier": "^3.3.1",
     "eslint-plugin-svelte3": "^3.0.0",
+    "fs-jetpack": "^4.1.1",
     "getenv": "^1.0.0",
     "log-update": "^4.0.0",
+    "nodemon": "^2.0.12",
     "postcss": "^8.2.2",
     "postcss-cli": "^8.3.1",
     "postcss-import": "^14.0.0",
@@ -52,6 +55,7 @@
     "date-fns": "^2.16.1",
     "debug": "^4.3.1",
     "immer": "^8.0.0",
+    "jspdf": "^2.3.1",
     "lodash": "^4.17.20",
     "package-json": "^6.5.0",
     "rollup-plugin-unused": "^0.1.0",

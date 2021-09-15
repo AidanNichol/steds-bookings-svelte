@@ -13,6 +13,15 @@ import Logit from '@utils/logit';
 
 var logit = Logit('store/monitorChanges');
 
+let startDay = now().substr(0, 10);
+setInterval(() => {
+  let currentDay = now().substr(0, 10);
+  console.log('reload?', startDay, currentDay);
+  if (startDay !== currentDay) {
+    logit('reload', startDay, currentDay);
+    location.reload();
+  }
+}, 1000 * 60 * 60);
 let retry = 0;
 const createEvents = () => {
   // let events = new EventSource();
@@ -44,6 +53,7 @@ const createEvents = () => {
   events.addEventListener('refreshAccountList', genListener(loadAccounts));
   events.addEventListener('refreshBookingCount', genListener(refreshedBookingStatus));
   events.addEventListener('refreshBanking', genListener(setStale));
+  events.addEventListener('reload', () => location.reload());
   return events;
 };
 createEvents();

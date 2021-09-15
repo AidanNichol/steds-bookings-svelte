@@ -6,6 +6,8 @@
   import MemberCell from './MemberCell.svelte';
   import Logit from '@utils/logit';
   import { status as openWalks } from '@store/walkBookingStatus';
+  import { fetchData } from '@utils/use-data-api';
+  import { today } from '@utils/dateFns';
   import {
     fundsManager,
     // accountMembers as members,
@@ -13,12 +15,16 @@
   } from '@store/accountStatus.js';
   import { nameIndex as index } from '@store/nameIndex';
   var logit = Logit('pages/bookings/statusTable');
-
+  let _today = 'W' + today();
   const showAvailable = (walk) => {
     let free = walk.capacity - walk.booked;
     const W = walk.waiting;
     if (W > 0) return `${free} (-${W})`;
     return `${free}`;
+  };
+  const closeWalk = async (walk) => {
+    await fetchData('walk/closeWalk/' + walk.walkId);
+    walk.closed = true;
   };
 
   // const [annoDialog, setAnnoDialog] = useState({ isOpen: false, booking: null });
@@ -76,7 +82,9 @@
   {#each $openWalks as walk, w}
     <div class="DV">
       {walk.walkId?.substr(1)}
-      <!-- {closeit(walk)} -->
+      {#if walk.walkId < _today}
+        <button on:click={() => closeWalk(walk)} class="closeWalk"> X </button>
+      {/if}
       <br />
       {walk.venue}
     </div>
@@ -118,6 +126,10 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+  }
+  .DV .closeWalk {
+    font-size: 0.7em;
+    padding: 0.2em;
   }
   div.available {
     padding-top: 20px;

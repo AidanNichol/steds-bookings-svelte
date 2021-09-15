@@ -38,24 +38,15 @@
         accountId,
         Allocations: [],
       });
-      if (amountTarget) amountTarget.value = '';
-      if (noteTarget) noteTarget.value = '';
+      amount = '';
+      note = '';
       paymentType = paymentOptions[0];
     }
   };
   const setPaymentType = (e) => logit('selectPaymentType', e);
   let amount = '',
     note = '';
-  let amountTarget = '',
-    noteTarget = '';
-  let amountChange = (event) => {
-    amount = event.target.value;
-    amountTarget = event.target;
-  };
-  let noteChange = (event) => {
-    note = event.target.value;
-    noteTarget = event.target;
-  };
+  $: logit('amount', amount, note);
   let paidInFull = (event) => {
     logit('paidInFull', owing);
     applyPaymentReceived({
@@ -98,7 +89,7 @@
       />
       &nbsp;£
       <div text="Enter paid amount and press enter" visible>
-        <input size="3" type="text" on:keyDown={handleKeydown} on:change={amountChange} />
+        <input size="3" type="text" on:keydown={handleKeydown} bind:value={amount} />
       </div>
       Note
       <input
@@ -106,8 +97,8 @@
         class="note"
         type="text"
         placeholder="Optionally Enter text and press enter"
-        on:keyDown={handleKeydown}
-        on:change={noteChange}
+        on:keydown={handleKeydown}
+        bind:value={note}
       />
       <button
         class="button pt-icon-help"

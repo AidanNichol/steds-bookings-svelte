@@ -5,6 +5,7 @@
   import {
     bookingLogData as bookings,
     fundsManager,
+    accountId,
     applyBookingChange,
   } from '@store/accountStatus';
   import { latestBanking } from '@store/banking';
@@ -17,8 +18,10 @@
 
   let balance;
   let lastBanking;
+  let shortNames;
   let highlightPayment = null;
   const setHighlightDate = (dat) => (highlightPayment = dat);
+  $: shortNames = $index.get($accountId)?.shortNames ?? {};
 
   $: lastBanking = $latestBanking?.bankingId.substr(2);
   // $: balance = $bookings
@@ -26,8 +29,8 @@
   //   .reduce((t, l) => t + l.balance, 0);
   $: balance = $fundsManager.balance;
   $: credits = $fundsManager.paymentsStack.map((p) => $fundsManager.payments[p]);
-  $: console.log('credits', credits);
-  $: logit('TheTable', { logs: $bookings, props: $$props, lastBanking });
+  $: console.log('credits', credits, balance);
+  $: logit('TheTable', { logs: $bookings, props: $$props, lastBanking, shortNames });
   $: console.table(
     $bookings.map((l) =>
       _.pick(l, [
@@ -95,7 +98,7 @@
                   <div>
                     <span>{dispDate(log.id)}</span>
                     <span class="icon">{@html svgMap[log.req]}</span>
-                    {$index.get(booking.memberId)?.shortName}
+                    {shortNames[booking.bookingId.substr(11)]}
                   </div>
                 {/each}
               </div>
@@ -109,7 +112,7 @@
               </span>
             </span>
             <!-- <Icon name={booking.status} class="icon" /> -->
-            {$index.get(booking.memberId)?.shortName}
+            {shortNames[booking.bookingId.substr(11)]}
           </div>
         {/each}
       </div>

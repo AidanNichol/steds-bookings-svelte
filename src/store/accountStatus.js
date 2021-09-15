@@ -2,7 +2,12 @@ import { writable, derived, get } from 'svelte/store';
 import { fetchData } from '@utils/use-data-api';
 import { produceWithPatches, enablePatches } from 'immer';
 import { nameIndex } from './nameIndex.js';
-import { bookingChange, annotateBooking, paymentReceived } from './fundsManager';
+import {
+  bookingChange,
+  annotateBooking,
+  paymentReceived,
+  allocateFunds,
+} from './fundsManager';
 import { format, addDays } from 'date-fns';
 import { currentMemberId } from './memberCurrent';
 import { addToQueue as addToPatchesQueue } from './patches';
@@ -52,6 +57,7 @@ export const accountId = derived(
     const accountId = $nameIndex?.get($memberId)?.accountId;
     logit('setting accountId', $memberId, accountId);
     bStale.set(true);
+    pStale.set(true);
     set(accountId);
     return;
   },
@@ -246,7 +252,8 @@ export const bookingLogData = derived(
 const createUpdateFunction = (process) => {
   return (payload) => {
     logit('dispatchPayload', payload);
-    const [nextState, ...patches] = produceWithPatches(get(fundsManager), (draft) =>
+    const fm = get(fundsManager);
+    const [nextState, ...patches] = produceWithPatches(fm, (draft) =>
       process(draft, payload),
     );
     logit('patches', patches);
@@ -261,6 +268,7 @@ const createUpdateFunction = (process) => {
 export const applyBookingChange = createUpdateFunction(bookingChange);
 export const applyAnnotateBooking = createUpdateFunction(annotateBooking);
 export const applyPaymentReceived = createUpdateFunction(paymentReceived);
+export const reAllocateFunds = createUpdateFunction(allocateFunds);
 /* 
     ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
     ┃             funds manager functions               ┃
@@ -275,6 +283,7 @@ export const fundsManager = derived(
     fm.Members = $accountMembers;
     logit('funds manager object', fm);
     set(fm);
+    reAllocateFunds(fm);
   },
   bookingData,
 );

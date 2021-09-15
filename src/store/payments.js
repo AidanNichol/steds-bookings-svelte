@@ -149,7 +149,7 @@ export const credits = derived(
     creditsData = await fetchData(`account/creditsOwed`);
     logit('fetchData returned', creditsData);
     set(creditsData);
-    $staleCredits.set(false);
+    $staleCredits = false;
   },
   [],
 );

@@ -64,7 +64,6 @@ export default {
         'src/images/fontawesome-subset/js-packages/@fortawesome/pro-regular-svg-icons/*.js',
         'src/images/fontawesome-subset/js-packages/@fortawesome/pro-solid-svg-icons/*.js',
         'src/images/fontawesome-subset/js-packages/@fortawesome/pro-duotone-svg-icons/*.js',
-        'src/ReportsPdf/*.mjs',
       ],
       extensions: [
         '.js',

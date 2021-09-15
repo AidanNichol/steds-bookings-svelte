@@ -3,10 +3,12 @@
   import { onMount } from 'svelte';
   import Panel from '@utils/AJNPanel.svelte';
   import TooltipButton from '@utils/TooltipButton.svelte';
-  import PaymentsSummaryReport from '@reports/PaymentsSummaryReport.svelte';
-  import PrintButton from '@utils/PrintButton.svelte';
+  // import PaymentsSummaryReport from '@reports/PaymentsSummaryReport.svelte';
+  // import PrintButton from '@utils/PrintButton.svelte';
   import Icon from '@utils/Icon2.svelte';
   import { dispDate } from '@utils/dateFns';
+  import { svgMap } from '@utils/iconMap';
+
   // import Notes20 from '../../images/poundSterling.jpg';
   // eslint-disable-next-line no-unused-vars
   import Notes20a from '@images/pound-banknote_1f4b7.png';
@@ -83,15 +85,23 @@
           img={Notes20}
           iconStyle="height: 50px;"
         />
-
-        <PrintButton
+        <a
+          class="print"
+          href="/bookingsServer/bookings/payment/paymentsReceivedRpt"
+          title="Print Summary Report"
+          target="_blank"
+          ><span>
+            {@html svgMap.Printer}
+          </span>
+        </a>
+        <!-- <PrintButton
           title="Payments Received"
           rcomp={PaymentsSummaryReport}
           tiptext="Print Summary Report"
           onClick={() => ($showBanking = true)}
           style="font-size: 2em;"
           visible
-        />
+        /> -->
       </div>
       {#each $paymentsMade as account}
         <div class={' member-rcpt'}>
@@ -226,5 +236,16 @@
   .detail .name {
     font-size: 0.9em;
     font-style: italic;
+  }
+  .print {
+    color: #333;
+    background-color: #e6e6e6;
+    border: 1px solid #adadad;
+    padding: 5px 0px 0px 22px;
+    border-radius: 4px;
+    position: relative;
+    cursor: pointer;
+    margin: 0;
+    width: 75px;
   }
 </style>

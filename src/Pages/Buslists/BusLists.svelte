@@ -1,10 +1,11 @@
 <script>
   /* jshint quotmark: false, jquery: true */
   // import Loading from "@utils/Loading.svelte";
-  import PrintButton from '@utils/PrintButton.svelte';
-  import SummaryReport from '@reports/SummaryReport.svelte';
+  // import PrintButton from '@utils/PrintButton.svelte';
+  // import SummaryReport from '@reports/SummaryReport.svelte';
   import { status as walkBookingStatus } from '@store/walkBookingStatus.js';
   import BusListSelectedWalk from './BusListSelectedWalk.svelte';
+  import { svgMap } from '@utils/iconMap';
 
   import SelectWalk from './SelectWalk.svelte';
 
@@ -31,12 +32,14 @@
       <SelectWalk {...{ walks: bookingStatus, setCurrentWalk, currentWalk }} />
     </div>
     <div class="buttons">
-      <PrintButton
-        rcomp={SummaryReport}
-        title="St.Eds - Bus Summary"
-        tiptext="Print Bus Lists"
-        visible
-      />
+      <a
+        class="print"
+        href="/bookingsServer/bookings/booking/walkdaySheets"
+        target="_blank"
+        ><span>
+          {@html svgMap.Printer}
+        </span>
+      </a>
     </div>
     <div class="lists">
       <BusListSelectedWalk {currentWalk} />
@@ -72,5 +75,16 @@
     font-size: 2em;
     margin: 0;
     padding-bottom: 8px;
+  }
+  .print {
+    color: #333;
+    background-color: #e6e6e6;
+    border: 1px solid #adadad;
+    padding: 5px 0px 0px 22px;
+    border-radius: 4px;
+    position: relative;
+    cursor: pointer;
+    margin: 0;
+    width: 75px;
   }
 </style>

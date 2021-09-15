@@ -1,13 +1,14 @@
 <script>
   import EditMemberData from './EditMemberData.svelte';
   import TooltipButton from '@utils/TooltipButton.svelte';
-  import PrintButton from '@utils/PrintButton.svelte';
-  import MembershipListReport from '@reports/membershipListRpt.svelte';
+  // import PrintButton from '@utils/PrintButton.svelte';
+  // import MembershipListReport from '@reports/membershipListRpt.svelte';
   // const MembershipListReport = {};
   import MembersIndex from './MembersIndex.svelte';
   import MembersAll from './MembersAll.svelte';
   import { setSortBy, toggleShowAll, sortBy, showAll } from '@store/membersIndex';
   import { editMode, createNewMember } from '@store/memberCurrent.js';
+  import { svgMap } from '@utils/iconMap';
 
   import Panel from '@utils/AJNPanel.svelte';
 
@@ -50,12 +51,23 @@
     </div>
 
     <span class="action-buttons" hidden={$editMode}>
-      <PrintButton
+      <a
+        class="print"
+        href={`/bookingsServer/bookings/member/membershipListRpt/${
+          $showAll ? 'Y' : 'N'
+        }/${$sortBy}`}
+        target="_blank"
+        title={`Print Membership List (Sorted by ${sortBy})`}
+        ><span>
+          {@html svgMap.Printer}
+        </span>
+      </a>
+      <!-- <PrintButton
         report={MembershipListReport}
         title="St.Edward's Fellwalkers - Members"
         visible
         rTiptext={`Print Membership List (Sorted by ${sortBy})`}
-      />
+      /> -->
       <TooltipButton
         icon="user_add"
         onClick={createNewMember}
@@ -87,7 +99,17 @@
     grid-row: 1;
     align-self: start;
   }
-
+  .print {
+    color: #333;
+    background-color: #e6e6e6;
+    border: 1px solid #adadad;
+    padding: 5px 9px;
+    border-radius: 4px;
+    position: relative;
+    cursor: pointer;
+    margin: 0;
+    /* width: 75px; */
+  }
   .names {
     grid-area: names;
     align-self: start;

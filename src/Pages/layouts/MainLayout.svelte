@@ -10,7 +10,8 @@
   import { page } from '@store/router';
   import { loaded, loading } from '@store/store';
   import { userStore } from '@store/user';
-  import PrintReport from '@reports/PrintReport.svelte';
+
+  // import PrintReport from '@reports/PrintReport.svelte';
   import { displayReport } from '@utils/PrintButton.svelte';
   import Modal from '@utils/Modal.svelte';
   import { modal } from '@store/modal';
@@ -19,12 +20,14 @@
   import DebugOptions from '../Debug/DebugOptions.svelte';
 
   import logo from '@images/St.EdwardsLogoSimple.svg';
+  const mode = process.env.NODE_ENV;
 
   import Logit from '@utils/logit';
   import packageJson from '../../../package.json';
   // import { setPageFromRoles } from '../../store/user';
   var logit = Logit('pages/layouts/MainLayout');
   const version = packageJson.version;
+  let title = 'St.Edwards bookings';
 
   // let Page;
 
@@ -44,57 +47,61 @@
   $: {
     // Page = pagemap[$page];
     logit('Pagechange', $page, $userStore);
-    if (!$displayReport) document.title = `St.Edwards bookings- ${$page}`;
+    if (!$displayReport) document.title = `${title} - ${$page}`;
+  }
+  if (mode === 'development') {
+    title += ' - (developmemnt)';
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#8f7031');
   }
 </script>
 
-{#if $displayReport}
+<!-- {#if $displayReport}
   <PrintReport />
-{:else}
-  <Modal show={$modal}>
-    <!-- <div style="height: 100%;"> -->
-    <div class="mainPage">
-      <img
-        class="logo"
-        src={logo}
-        width="40px"
-        alt=""
-        on:click={() => {
-          page.set('debugSettings');
-        }}
-      />
-      <span class="version">{`v${version}`}</span>
-      <div class="signin">
-        <LoginForm />
-      </div>
-      <div class="nav">
-        {#if $userStore.hasBookingsRole}
-          <Link toPage="bookings" name="Bookings" />
-          <Link toPage="buslists" name="Buslist" />
-          <Link toPage="payments" name="Payments" />
-          {#if $userStore.roles.includes('admin')}
-            <Link toPage="icons" name="Icons" />
-          {/if}
-        {/if}
-        {#if $userStore.hasMembersRole}
-          <Link toPage="membersList" name="Members" />
-        {/if}
-      </div>
-
-      <div style=" padding: 5;" class="maincontent">
-        {#if $loading}
-          <span>loading </span>
-        {:else if !$loaded}
-          <div>Welcome to St.Edwards Booking System - please login.</div>
-        {:else}
-          <svelte:component this={pagemap[$page]} />
-        {/if}
-      </div>
+{:else} -->
+<Modal show={$modal}>
+  <!-- <div style="height: 100%;"> -->
+  <div class="mainPage">
+    <img
+      class="logo"
+      src={logo}
+      width="40px"
+      alt=""
+      on:click={() => {
+        page.set('debugSettings');
+      }}
+    />
+    <span class="version">{`v${version}`}</span>
+    <div class="signin">
+      <LoginForm />
     </div>
-    <!-- </div> -->
-  </Modal>
-{/if}
+    <div class="nav">
+      {#if $userStore.hasBookingsRole}
+        <Link toPage="bookings" name="Bookings" />
+        <Link toPage="buslists" name="Buslist" />
+        <Link toPage="payments" name="Payments" />
+        {#if $userStore.roles.includes('admin')}
+          <Link toPage="icons" name="Icons" />
+        {/if}
+      {/if}
+      {#if $userStore.hasMembersRole}
+        <Link toPage="membersList" name="Members" />
+      {/if}
+    </div>
 
+    <div style=" padding: 5;" class="maincontent">
+      {#if $loading}
+        <span>loading </span>
+      {:else if !$loaded}
+        <div>Welcome to St.Edwards Booking System - please login.</div>
+      {:else}
+        <svelte:component this={pagemap[$page]} />
+      {/if}
+    </div>
+  </div>
+  <!-- </div> -->
+</Modal>
+
+<!-- {/if} -->
 <style lang="postcss">
   :global(*) {
     margin: 0;

@@ -15,7 +15,11 @@ export const walksListStore = walksList;
 
 export const loadWalks = async () => {
   const walks = await fetchData('walk/index');
-
+  walks.forEach((w) => {
+    if (!w.shortCode) {
+      w.shortCode = w.venue.substr(0, 4);
+    }
+  });
   logit('walks fetchdata returned', walks?.length, walks);
   walksList.set(walks);
   // walksList.setList(walks);

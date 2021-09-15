@@ -64,6 +64,7 @@ export default {
         'src/images/fontawesome-subset/js-packages/@fortawesome/pro-regular-svg-icons/*.js',
         'src/images/fontawesome-subset/js-packages/@fortawesome/pro-solid-svg-icons/*.js',
         'src/images/fontawesome-subset/js-packages/@fortawesome/pro-duotone-svg-icons/*.js',
+        'src/ReportsPdf/*.mjs',
       ],
       extensions: [
         '.js',
@@ -159,7 +160,7 @@ export default {
       dev({
         dirs: ['public'],
         spa: 'public/index.html',
-        port: 5000,
+        port: 5500,
         proxy: {
           '/bookingsServer/*': 'http://localhost:4444/bookingsServer/',
         },

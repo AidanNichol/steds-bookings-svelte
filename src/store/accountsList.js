@@ -21,8 +21,15 @@ export const accountsListStore = accountsList;
 */
 
 export const loadAccounts = async () => {
-  const accounts = await fetchData('account/index');
-
+  let accounts = await fetchData('account/index');
+  accounts.forEach((a) => {
+    const noMems = a.Members.length;
+    a.shortNames = {};
+    a.Members.forEach((m) => {
+      m.shortName = noMems === 1 ? '' : `[${m.firstName}]`;
+      a.shortNames[m.memberId] = m.shortName;
+    });
+  });
   logit('accounts fetchdata returned', accounts?.length, accounts);
   accountsList.set(accounts);
   // accountsList.setList(accounts);

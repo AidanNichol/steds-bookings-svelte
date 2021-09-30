@@ -2,6 +2,7 @@ import Logit from '@utils/logit';
 import { getTimestamp } from '@utils/dateFns';
 import _ from 'lodash';
 import { sprintf } from 'sprintf-js';
+import { current } from 'immer';
 var logit = Logit('store/fundsManager');
 
 const traceMe = true;
@@ -97,7 +98,7 @@ export const bookingChange = (draft, payload) => {
   return draft;
 };
 
-const factor = { B: 1, C: 0.5, BX: -1, CX: 0, BL: 0 };
+const factor = { B: 1, C: 0.5, BX: 0, CX: 0, BL: 1 };
 
 const upsertBooking = (draft, payload) => {
   const { req, memberId, walkId, fee: walkFee } = payload;
@@ -106,17 +107,17 @@ const upsertBooking = (draft, payload) => {
   let booking = draft.bookings[bookingId];
   if (!booking) {
     booking = { bookingId, walkId, memberId, BookingLogs: [], Allocations: [] };
-  }
-  logit('booking 1', booking, dat);
+    logit('booking 1', booking, dat);
+  } else logit('booking 1', current(booking), dat);
   if (req === booking.status) return null;
   let late = booking.late || req === 'BL';
-  const fee = late ? 0 : walkFee * factor[req];
+  const fee = walkFee * factor[req];
   draft.lastAction = [dat, `${memberId} ${walkId}`, `booking`, req];
   logit('lastAction', draft.lastAction);
   let log = { id: dat, bookingId, dat, req, who: '???', fee, late };
   if (booking.status === 'BL' && req === 'BX') {
-    log = booking.BookingLogs.pop();
-    log.req = req;
+    // log = booking.BookingLogs.pop();
+    // log.req = req;
     log.late = false;
     late = false;
   }
@@ -228,6 +229,23 @@ const createRefund = (draft, payload) => {
   draft.payments[timeS] = refund;
   return refund;
 };
+/*
+    ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+    ┃          processDeletePayment                  ┃
+    ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+*/
+export const processDeletePayment = (draft, paymentId) => {
+  const payment = draft.payments[paymentId];
+  logit('deleteing payment', current(payment));
+  for (const alloc of payment.Allocations || []) {
+    const bkng = draft.bookings[alloc.bookingId];
+    bkng.owing += alloc.amount;
+  }
+  draft.paymentsStack = draft.paymentsStack.filter((pymntId) => pymntId !== paymentId);
+
+  delete draft.payments[paymentId];
+};
+
 /*
     ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
     ┃          processCancellation                   ┃

@@ -7,6 +7,7 @@ import {
   annotateBooking,
   paymentReceived,
   allocateFunds,
+  processDeletePayment,
 } from './fundsManager';
 import { format, addDays } from 'date-fns';
 import { currentMemberId } from './memberCurrent';
@@ -78,19 +79,22 @@ export const accountMembers = derived(
   [],
 );
 export const refreshAccountBookings = (data) => {
-  const memAccountId = get(nameIndex)?.get(data.memberId)?.accountId;
+  let refAccountId = data.accountId;
+  if (data.memberId) {
+    refAccountId = get(nameIndex)?.get(data.memberId)?.accountId;
+  }
   const currAccountId = get(accountId);
-  logit('refreshAccountBooking', data, currAccountId, memAccountId);
-  const thisAccount = data.accountId === currAccountId || memAccountId === currAccountId;
-  if (!thisAccount) return;
-  if (data.memberId || data.payments) {
-    bStale.set(true);
-    logit('bStale now', get(bStale));
-  }
-  if (data.accountId || data.payments) {
-    pStale.set(true);
-    logit('pStale now', get(pStale));
-  }
+  logit('refreshAccountBooking', data, currAccountId, refAccountId);
+  // const thisAccount = data.accountId === currAccountId || memAccountId === currAccountId;
+  if (refAccountId !== currAccountId) return;
+  // if (data.memberId || data.payments) {
+  bStale.set(true);
+  logit('bStale now', get(bStale));
+  // }
+  // if (data.accountId || data.payments) {
+  pStale.set(true);
+  logit('pStale now', get(pStale));
+  // }
 };
 
 /*
@@ -269,6 +273,7 @@ export const applyBookingChange = createUpdateFunction(bookingChange);
 export const applyAnnotateBooking = createUpdateFunction(annotateBooking);
 export const applyPaymentReceived = createUpdateFunction(paymentReceived);
 export const reAllocateFunds = createUpdateFunction(allocateFunds);
+export const deletePayment = createUpdateFunction(processDeletePayment);
 /* 
     ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
     ┃             funds manager functions               ┃

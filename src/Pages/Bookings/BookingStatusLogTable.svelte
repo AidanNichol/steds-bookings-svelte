@@ -7,6 +7,7 @@
     fundsManager,
     accountId,
     applyBookingChange,
+    deletePayment,
   } from '@store/accountStatus';
   import { latestBanking } from '@store/banking';
   import _ from 'lodash';
@@ -19,8 +20,10 @@
   let balance;
   let lastBanking;
   let shortNames;
-  let highlightPayment = null;
-  const setHighlightDate = (dat) => (highlightPayment = dat);
+  let highlight = null;
+  const setHighlightDate = (pay = null) => {
+    highlight = pay;
+  };
   $: shortNames = $index.get($accountId)?.shortNames ?? {};
 
   $: lastBanking = $latestBanking?.bankingId.substr(2);
@@ -53,6 +56,17 @@
     const { memberId, walkId } = booking;
     applyBookingChange({ walkId, memberId, req: 'BX' });
   };
+  const onDeletePayment = () => {
+    if (
+      window.confirm(
+        `Do really want to remove the payment of £${
+          highlight.amount
+        } \n entered at ${dispDate(highlight.paymentId)}`,
+      )
+    ) {
+      deletePayment(highlight.paymentId);
+    }
+  };
   const preparePayments = (mBookings) => {
     let allocations = mBookings.map((b) => b.Allocations).flat();
     logit('myAllocs', allocations);
@@ -66,6 +80,7 @@
         req: as[0]?.Payment?.req ?? 'P',
         tot: as[0]?.Payment?.amount ?? '?',
         amount,
+        deletable: !as[0]?.Payment?.bankingId,
       };
     });
     logit('myAllocs3', allocations);
@@ -79,9 +94,20 @@
 </script>
 
 <div class="scrollBox">
-  {#if highlightPayment}
-    <div class="highlight box" on:click={() => setHighlightDate(null)}>
-      {dispDate(highlightPayment)}
+  {#if highlight}
+    <div class="highlight-container" on:click={() => setHighlightDate(null)}>
+      {#if highlight?.deletable}
+        <div
+          class="delPayment"
+          on:click={() => onDeletePayment()}
+          title="remove this payment"
+        >
+          {@html svgMap[highlight.req]}{@html svgMap.long_arrow_right}{@html svgMap.trash}
+        </div>
+      {/if}
+      <div class="highlight">
+        {dispDate(highlight.paymentId)}
+      </div>
     </div>
   {/if}
   {#each $bookings as [walkId, mBookings], i}
@@ -119,8 +145,8 @@
       <div class="payments">
         {#each preparePayments(mBookings) as pay}
           <div
-            class:highlight={highlightPayment === pay.paymentId}
-            on:click={() => setHighlightDate(pay.paymentId)}
+            class:highlight={highlight?.paymentId === pay.paymentId}
+            on:click={() => setHighlightDate(pay)}
           >
             <span class="payDate">{dispDate(pay.paymentId)}</span>
             <span class="icon">{@html svgMap[pay.req]}</span>
@@ -150,8 +176,10 @@
     <div class=" bookingBlock">
       <div class="payments">
         {#each credits as pay}
-          <div class:highlight={highlightPayment === pay.paymentId}>
-            <span class="payDate" on:click={() => setHighlightDate(pay.paymentId)}
+          <div class:highlight={highlight?.paymentId === pay.paymentId}>
+            <span
+              class="payDate"
+              on:click={() => setHighlightDate({ ...pay, deletable: true })}
               >{dispDate(pay.paymentId)}</span
             >
             <span class="icon">{@html svgMap[pay.req]}</span>
@@ -268,16 +296,28 @@
     cursor: pointer;
   }
   .highlight {
-    background-color: khaki;
     font-weight: bold;
+    background-color: khaki;
   }
-  .highlight.box {
-    border: thin solid black;
-    border-radius: 2px;
+  .highlight-container {
     position: absolute;
     top: 0;
     right: 0;
     z-index: 15;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+  }
+  .highlight-container div {
+    border: thin solid black;
+    border-radius: 4px;
+  }
+
+  .delPayment {
+    background-color: lightsalmon;
+    padding: 2px;
+    margin-right: 6px;
+    border-radius: 10px;
   }
 
   div.total {

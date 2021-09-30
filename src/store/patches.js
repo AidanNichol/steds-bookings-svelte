@@ -91,7 +91,7 @@ const expandPatch = (arr) => {
       return newPatches.push(p);
     }
     if (path[0] === 'payments') path[0] = 'Payment';
-    if (path[0] === 'Payment' && path.length < 3) {
+    if (path[0] === 'Payment' && path.length < 3 && value) {
       logit('payments', p);
       let allocs = (value.Allocations || []).filter((v) => !v.id);
       if (allocs.length > 0) {

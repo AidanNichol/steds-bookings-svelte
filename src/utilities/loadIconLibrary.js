@@ -3,12 +3,6 @@ import { library } from '@fortawesome/fontawesome-svg-core';
 import { fad } from '@images/fontawesome-subset/js-packages/@fortawesome/pro-duotone-svg-icons';
 import { far } from '@images/fa-subset/js-packages/@fortawesome/pro-regular-svg-icons';
 import { fas } from '@images/fontawesome-subset/js-packages/@fortawesome/pro-solid-svg-icons';
-import { now } from '@utils/dateFns';
-
-import packageJson from '../../package.json';
-// import { setPageFromRoles } from '../../store/user';
-const version = packageJson.version;
-console.warn('starting loadIconLibrary.js v:', version, '@', now());
 const treasurer = {
   prefix: 'ajn',
   iconName: 'treasurer',

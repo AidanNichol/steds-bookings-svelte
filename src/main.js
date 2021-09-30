@@ -1,4 +1,5 @@
 // import App from './App.svelte';
+import '@utils/versionHeader.js';
 import '@utils/loadIconLibrary.js';
 
 import App from './Pages/layouts/MainLayout.svelte';

@@ -19,6 +19,8 @@ export const faThumbsDown: IconDefinition;
 export const faThumbsUp: IconDefinition;
 export const faTombstone: IconDefinition;
 export const faTombstoneAlt: IconDefinition;
+export const faTrash: IconDefinition;
+export const faTrashAlt: IconDefinition;
 export const faUser: IconDefinition;
 import { IconDefinition, IconLookup, IconName, IconPrefix, IconPack } from '@fortawesome/fontawesome-common-types';
 export { IconDefinition, IconLookup, IconName, IconPrefix, IconPack } from '@fortawesome/fontawesome-common-types';

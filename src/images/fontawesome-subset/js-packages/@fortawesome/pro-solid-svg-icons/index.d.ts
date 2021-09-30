@@ -2,7 +2,6 @@ export const faBan: IconDefinition;
 export const faCheck: IconDefinition;
 export const faEdit: IconDefinition;
 export const faHandHolding: IconDefinition;
-export const faLongArrowRight: IconDefinition;
 export const faPlus: IconDefinition;
 export const faPoundSign: IconDefinition;
 export const faSlash: IconDefinition;

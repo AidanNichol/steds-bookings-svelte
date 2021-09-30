@@ -42,6 +42,8 @@ export type IconName = 'arrow-alt-down' |
   'thumbs-up' | 
   'tombstone' | 
   'tombstone-alt' | 
+  'trash' | 
+  'trash-alt' | 
   'user' | 
   'arrow-alt-down' | 
   'arrow-alt-up' | 
@@ -50,11 +52,11 @@ export type IconName = 'arrow-alt-down' |
   'long-arrow-down' | 
   'long-arrow-right' | 
   'long-arrow-up' | 
+  'trash-alt' | 
   'ban' | 
   'check' | 
   'edit' | 
   'hand-holding' | 
-  'long-arrow-right' | 
   'plus' | 
   'pound-sign' | 
   'slash' | 

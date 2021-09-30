@@ -30,20 +30,20 @@
     iconName: 'long-arrow-down',
     icon: [320, 512, [], "f175", "M300.3 327.5l-19.6-19.6c-4.8-4.8-12.5-4.7-17.1.2L186 388.8V44c0-6.6-5.4-12-12-12h-28c-6.6 0-12 5.4-12 12v344.8l-77.5-80.7c-4.7-4.8-12.4-4.9-17.1-.2l-19.6 19.6c-4.7 4.7-4.7 12.3 0 17l131.8 131.8c4.7 4.7 12.3 4.7 17 0l131.8-131.8c4.6-4.7 4.6-12.3-.1-17z"]
   };
+  var faLongArrowRight = {
+    prefix: 'far',
+    iconName: 'long-arrow-right',
+    icon: [448, 512, [], "f178", "M295.515 115.716l-19.626 19.626c-4.753 4.753-4.675 12.484.173 17.14L356.78 230H12c-6.627 0-12 5.373-12 12v28c0 6.627 5.373 12 12 12h344.78l-80.717 77.518c-4.849 4.656-4.927 12.387-.173 17.14l19.626 19.626c4.686 4.686 12.284 4.686 16.971 0l131.799-131.799c4.686-4.686 4.686-12.284 0-16.971L312.485 115.716c-4.686-4.686-12.284-4.686-16.97 0z"]
+  };
   var faLongArrowUp = {
     prefix: 'far',
     iconName: 'long-arrow-up',
     icon: [320, 512, [], "f176", "M19.716 184.485l19.626 19.626c4.753 4.753 12.484 4.675 17.14-.173L134 123.22V468c0 6.627 5.373 12 12 12h28c6.627 0 12-5.373 12-12V123.22l77.518 80.717c4.656 4.849 12.387 4.927 17.14.173l19.626-19.626c4.686-4.686 4.686-12.284 0-16.971L168.485 35.716c-4.686-4.686-12.284-4.686-16.971 0L19.716 167.515c-4.686 4.686-4.686 12.284 0 16.97z"]
   };
-  var faSquare = {
+  var faTrashAlt = {
     prefix: 'far',
-    iconName: 'square',
-    icon: [448, 512, [], "f0c8", "M400 32H48C21.5 32 0 53.5 0 80v352c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48V80c0-26.5-21.5-48-48-48zm-6 400H54c-3.3 0-6-2.7-6-6V86c0-3.3 2.7-6 6-6h340c3.3 0 6 2.7 6 6v340c0 3.3-2.7 6-6 6z"]
-  };
-  var faSquareFull = {
-    prefix: 'far',
-    iconName: 'square-full',
-    icon: [512, 512, [], "f45c", "M0 0v512h512V0H0zm464 464H48V48h416v416z"]
+    iconName: 'trash-alt',
+    icon: [448, 512, [], "f2ed", "M268 416h24a12 12 0 0 0 12-12V188a12 12 0 0 0-12-12h-24a12 12 0 0 0-12 12v216a12 12 0 0 0 12 12zM432 80h-82.41l-34-56.7A48 48 0 0 0 274.41 0H173.59a48 48 0 0 0-41.16 23.3L98.41 80H16A16 16 0 0 0 0 96v16a16 16 0 0 0 16 16h16v336a48 48 0 0 0 48 48h288a48 48 0 0 0 48-48V128h16a16 16 0 0 0 16-16V96a16 16 0 0 0-16-16zM171.84 50.91A6 6 0 0 1 177 48h94a6 6 0 0 1 5.15 2.91L293.61 80H154.39zM368 464H80V128h288zm-212-48h24a12 12 0 0 0 12-12V188a12 12 0 0 0-12-12h-24a12 12 0 0 0-12 12v216a12 12 0 0 0 12 12z"]
   };
   var _iconsCache = {
     faArrowAltDown: faArrowAltDown,
@@ -51,9 +51,9 @@
     faCircle: faCircle,
     faInfoSquare: faInfoSquare,
     faLongArrowDown: faLongArrowDown,
+    faLongArrowRight: faLongArrowRight,
     faLongArrowUp: faLongArrowUp,
-    faSquare: faSquare,
-    faSquareFull: faSquareFull
+    faTrashAlt: faTrashAlt
   };
 
   exports.far = _iconsCache;
@@ -63,9 +63,9 @@
   exports.faCircle = faCircle;
   exports.faInfoSquare = faInfoSquare;
   exports.faLongArrowDown = faLongArrowDown;
+  exports.faLongArrowRight = faLongArrowRight;
   exports.faLongArrowUp = faLongArrowUp;
-  exports.faSquare = faSquare;
-  exports.faSquareFull = faSquareFull;
+  exports.faTrashAlt = faTrashAlt;
 
   Object.defineProperty(exports, '__esModule', { value: true });
 

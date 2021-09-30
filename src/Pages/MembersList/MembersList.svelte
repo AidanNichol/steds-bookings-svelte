@@ -62,12 +62,6 @@
           {@html svgMap.Printer}
         </span>
       </a>
-      <!-- <PrintButton
-        report={MembershipListReport}
-        title="St.Edward's Fellwalkers - Members"
-        visible
-        rTiptext={`Print Membership List (Sorted by ${sortBy})`}
-      /> -->
       <TooltipButton
         icon="user_add"
         onClick={createNewMember}

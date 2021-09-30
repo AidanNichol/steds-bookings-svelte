@@ -8,3 +8,4 @@ yarn-error.*
 /.vscode
 .env
 testReport.pdf
+src/images/Subset.zip

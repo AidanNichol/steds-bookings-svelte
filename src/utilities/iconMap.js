@@ -30,6 +30,7 @@ const afIcons = {
   Blank: { icon: ['far', 'circle'], color: 'blue' },
   Cancel: { icon: ['fas', 'times'] },
   Printer: { icon: ['fad', 'print'] },
+  trash: { icon: ['fad', 'trash-alt'] },
   spinner: { icon: ['fad', 'spinner'], color: 'blue', classes: ['fa-spin'] },
   spinner_third: { icon: ['fad', 'spinner-third'], classes: ['fa-spin'] },
   info_square: { icon: ['far', 'info-square'] },
@@ -37,7 +38,7 @@ const afIcons = {
   square_full: { icon: ['far', 'square-full'] },
   long_arrow_down: { icon: ['far', 'long-arrow-down'] },
   long_arrow_right: { icon: ['fad', 'long-arrow-right'] },
-  fasLongArrowRight: { icon: ['fas', 'long-arrow-right'] },
+  // fasLongArrowRight: { icon: ['fas', 'long-arrow-right'] },
   // farLongArrowRight: { icon: ['far', 'long-arrow-right'] },
   page_up: { icon: ['fad', 'arrow-alt-up'] },
   page_down: { icon: ['fad', 'arrow-alt-down'] },
@@ -107,7 +108,7 @@ export const buildIcon = (name, parts = afIcons[name]) => {
       } = part;
       rest.styles = { color };
       const def = findIconDefinition({ prefix, iconName });
-      // console.log({ lay: part, prefix, iconName, rest, def });
+      // console.log(name, { lay: part, prefix, iconName, rest, def });
       push(icon(def, rest));
     });
   });

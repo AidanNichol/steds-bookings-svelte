@@ -32,7 +32,6 @@
 
   export let toggleDisplay;
   logit('loaded', true);
-  // const [showBanking, setShowBanking] = useState(false);
 
   $: logit('hooky stuff', $paymentsMade, $banking, $showBanking);
   // if (!banking) return null;
@@ -83,25 +82,18 @@
           visible={$showBanking}
           style={{ maxHeight: 54, padding: '2px 5px' }}
           img={Notes20}
-          iconStyle="height: 50px;"
+          iconStyle="height: 40px;"
         />
         <a
           class="print"
           href="/bookingsServer/bookings/payment/paymentsReceivedRpt"
           title="Print Summary Report"
+          on:click={() => ($showBanking = true)}
           target="_blank"
           ><span>
             {@html svgMap.Printer}
           </span>
         </a>
-        <!-- <PrintButton
-          title="Payments Received"
-          rcomp={PaymentsSummaryReport}
-          tiptext="Print Summary Report"
-          onClick={() => ($showBanking = true)}
-          style="font-size: 2em;"
-          visible
-        /> -->
       </div>
       {#each $paymentsMade as account}
         <div class={' member-rcpt'}>
@@ -138,7 +130,6 @@
     display: flex;
     flex-direction: column;
     flex-wrap: wrap;
-    /* justify-content: flex-start; */
     align-content: flex-start;
     height: 100%;
     flex: 0 0 300px;
@@ -148,10 +139,11 @@
   .all-payments .buttons {
     display: flex;
     flex-direction: row;
-    padding-bottom: 4px;
     align-items: center;
     justify-content: space-between;
     width: 250px;
+    min-height: 45px;
+    margin: 0;
   }
 
   .member-rcpt {
@@ -238,14 +230,17 @@
     font-style: italic;
   }
   .print {
+    display: inline-block;
+    text-align: center;
     color: #333;
     background-color: #e6e6e6;
     border: 1px solid #adadad;
-    padding: 5px 0px 0px 22px;
     border-radius: 4px;
     position: relative;
     cursor: pointer;
     margin: 0;
-    width: 75px;
+    width: 55px;
+
+    font-size: 1.7em;
   }
 </style>

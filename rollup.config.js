@@ -52,6 +52,7 @@ export default {
     format: 'iife',
     name: 'app',
     file: 'public/build/bundle.js',
+    // globals: { 'sprintf-js': 'sprintf' },
     // dir: 'public/build',
     // entryFileNames: 'bundle-[hash].js',
   },
@@ -159,10 +160,14 @@ export default {
       dev({
         dirs: ['public'],
         spa: 'public/index.html',
+        // spa: true,
         port: 5500,
-        proxy: {
-          '/bookingsServer/*': 'http://localhost:4444/bookingsServer/',
-        },
+        proxy: [
+          {
+            from: '/bookingsServer/*',
+            to: 'http://localhost:4444/bookingsServer/',
+          },
+        ],
       }),
     // // In dev mode, call `npm run start` once
     // // the bundle has been generated

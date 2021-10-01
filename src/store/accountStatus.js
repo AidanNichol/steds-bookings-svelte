@@ -142,6 +142,7 @@ export const activeBookings = derived(
     if ($bStale === false) return;
     if ($startDate === '0000-00-00') return;
     if (!$accountId || !$startDate) return;
+    set([]);
     let account = await fetchData(`account/activeBookings/${$accountId}/${$startDate}`);
     let bookings = flattenBookings(account);
 
@@ -167,6 +168,7 @@ export const activePayments = derived(
     if ($pStale === false) return;
 
     if (!$accountId || !$startDate) return;
+    set([]);
     let account = await fetchData(`account/activePayments/${$accountId}/${$startDate}`);
     let payments = account.Payments;
 
@@ -204,7 +206,7 @@ export const historicBookings = derived(
       set([]);
       return;
     }
-
+    set([]);
     const res = await fetchData(
       `account/bookingsData/${$accountId}/${$startDate}/${$endDate}`,
     );

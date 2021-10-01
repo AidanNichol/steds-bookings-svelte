@@ -1,5 +1,7 @@
 <script>
   import { svgMap } from '@utils/iconMap.js';
+  import Marquee from './StatusTable/Marquee.svelte';
+
   import { dispDate, todaysDate } from '@utils/dateFns';
   import { nameIndex as index } from '@store/nameIndex';
   import {
@@ -74,14 +76,24 @@
     logit('myAllocs2', allocations);
     allocations = Object.values(allocations).map((as) => {
       let amount = as.reduce((acc, all) => acc + all.amount, 0);
-      return {
-        paymentId: as[0].paymentId,
+      // const pay = as[0]?.Payment;
+      const {
+        paymentId,
+        req = 'P',
+        amount: tot = '?',
+        note,
+        bankingId,
+      } = as[0]?.Payment ?? {};
+      return { paymentId, req, tot, amount, note, deletable: !bankingId };
+      // return {
+      //   paymentId: pay.paymentId,
 
-        req: as[0]?.Payment?.req ?? 'P',
-        tot: as[0]?.Payment?.amount ?? '?',
-        amount,
-        deletable: !as[0]?.Payment?.bankingId,
-      };
+      //   req: pay?.req ?? 'P',
+      //   tot: pay?.amount ?? '?',
+      //   note: pay?.note??'',
+      //   amount,
+      //   deletable: !pay?.bankingId,
+      // };
     });
     logit('myAllocs3', allocations);
     return allocations;
@@ -156,6 +168,11 @@
             {#if pay.amount !== pay.tot}
               <span>(*{pay.tot})</span>
             {/if}
+            {#if pay.note}
+              <div class="note">
+                <Marquee text={pay.note} />
+              </div>
+            {/if}
           </div>
         {/each}
         {#if owing(mBookings) > 0}
@@ -188,6 +205,11 @@
             <span>{pay.available}</span>
             {#if pay.amount !== pay.available}
               <span>(*{pay.amount})</span>
+            {/if}
+            {#if pay.note}
+              <div class="note">
+                <Marquee text={pay.note} />
+              </div>
             {/if}
           </div>
         {/each}
@@ -352,5 +374,11 @@
     min-height: 0;
     overflow: auto;
     max-height: calc(99vh - 230px);
+  }
+  .note {
+    max-width: 200px;
+    height: 10px;
+    overflow: hidden;
+    padding-top: 5px;
   }
 </style>

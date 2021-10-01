@@ -1,58 +1,123 @@
 <script>
-  import Select from 'svelte-select';
-  import Item from './MembersItem.svelte';
-  import { createEventDispatcher } from 'svelte';
+  // import Item from './MembersItem.svelte';
+  // import { createEventDispatcher } from 'svelte';
   import { sortedByNameList as members } from '@store/membersIndex';
   import { currentMemberId } from '@store/memberCurrent';
   import Logit from '@utils/logit';
 
   var logit = Logit('pages/bookings/SelectMember', true);
-  const dispatch = createEventDispatcher();
+  // const dispatch = createEventDispatcher();
+  let filterText = '';
+  let showList = false;
+  $: regex = new RegExp(filterText, 'i');
+  $: fMembers = $members.filter((mem) => regex.test(mem.fullName));
 
-  let selectedValue = { id: null, fullName: 'Search for Member...' };
-  $: options = {
-    optionIdentifier: 'id',
-    getOptionLabel: (option) => option.sortName,
-    getSelectionLabel: (option) => option.fullName,
-    placeholder: 'Search for Member...',
-    isClearable: true,
-    Item,
+  const onFocus = () => {
+    showList = true;
+  };
+  const onBlur = () => {
+    setTimeout(() => {
+      showList = false;
+    }, 1000);
   };
 
-  const memberSelected = (e) => {
-    // const mem = e.detail;
-    const { id } = selectedValue;
-    logit('selected', e, selectedValue);
+  const _today = new Date();
+  let thisYear = _today.getFullYear();
+  const isDeletable = (item) => {
+    if (item === 'Deceased') return true;
+    if (
+      item.memberStatus === 'Member' &&
+      (item.suspended || item.subscription < thisYear)
+    ) {
+      return true;
+    }
+    return false;
+  };
+  const dispName = (name) => {
+    var regex = new RegExp(`^(.*?)(${filterText})(.*)$`, 'i');
+    let parts = name.match(regex);
+    if (!parts) return name;
+    const [, p1, p2, p3] = parts;
+    return `${p1}<span style="color:blue; font-weight:bold;">${p2}</span>${p3}`;
+  };
+
+  const selectMem = (id) => {
+    logit('select member', id);
     id && currentMemberId.set(id);
-    // selectedValue = mem;
-    setTimeout(() => {
-      if (id) selectedValue = { id: null, fullName: 'Search for Member...' };
-    }, 100);
-    dispatch('clear', undefined);
+    showList = false;
+    filterText = '';
+  };
+  let handleKeydown = (event) => {
+    showList = true;
+    if (event.which === 13 || event.which === 9) {
+      selectMem(fMembers[0].memberId);
+    }
   };
 </script>
 
-<div class={$$props.class ?? ''}>
-  <Select items={$members} {...options} bind:selectedValue on:select={memberSelected} />
+<div class="selectBox">
+  <input
+    type="text"
+    bind:value={filterText}
+    placeholder="Search for Member..."
+    on:keydown={handleKeydown}
+    on:focus={onFocus}
+    on:blur={onBlur}
+  />
+  {#if showList}
+    <div class="listBox">
+      {#each fMembers as mem}
+        <div
+          class="member"
+          class:deleteable={isDeletable(mem)}
+          on:click={() => selectMem(mem.memberId)}
+        >
+          {@html dispName(mem.sortName)}
+        </div>
+      {/each}
+    </div>
+  {/if}
 </div>
 
+<!-- <div class={$$props.class ?? ''}>
+  <Select items={$members} {...options} bind:selectedValue on:select={memberSelected} />
+</div> -->
 <style>
   :global(input) {
     margin: 0;
   }
-
-  /* 	CSS variables can be used to control theming.
-			https://github.com/rob-balfre/svelte-select/blob/master/docs/theming_variables.md
-	*/
-
-  .themed {
-    --border: 3px solid blue;
-    --borderRadius: 10px;
-    --placeholderColor: blue;
+  .selectBox {
+    position: relative;
   }
-
-  .icon {
-    --selectedItemPadding: 0 10px 0 8px;
-    --inputPadding: 0 10px 0 40px;
+  .selectBox input {
+    height: 42px;
+    width: 300px;
+    padding: 0 16px;
+  }
+  /* .selectBox:focus-within .listBox {
+    display: block;
+  } */
+  .listBox {
+    /* display: none; */
+    position: absolute;
+    top: 44px;
+    max-height: 350px;
+    overflow-y: scroll;
+    width: 300px;
+    background-color: white;
+    border: thin solid black;
+    z-index: 10;
+    padding: 0 20px;
+    box-shadow: 10px 5px 5px grey;
+  }
+  .member {
+    height: 42px;
+    line-height: 42px;
+  }
+  .member:hover {
+    background: #b9daff;
+  }
+  .deleteable {
+    text-decoration: line-through;
   }
 </style>

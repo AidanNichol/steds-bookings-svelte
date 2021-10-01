@@ -1,4 +1,4 @@
-projectName: fontawesome-subset
+projectName: fa-subset
 version: 5.13.1
 icons:
   - slash:
@@ -69,3 +69,16 @@ icons:
       - duotone
   - tombstone-alt:
       - duotone
+  - long-arrow-right:
+      - duotone
+      - regular
+      - solid
+  - trash:
+      - duotone
+  - trash-alt:
+      - duotone
+      - regular
+  - square:
+      - regular
+  - square-full:
+      - regular

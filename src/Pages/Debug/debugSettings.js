@@ -215,6 +215,7 @@ export function setupTreeRoot(tree, path, name) {
   return ret;
 }
 export function walkTree(tree, fn) {
+  if (!tree) return {};
   if (tree.leaf) return fn(tree);
   let nodes = {};
   (tree?.branches ?? []).forEach((key) => (nodes[key] = walkTree(tree[key], fn)));

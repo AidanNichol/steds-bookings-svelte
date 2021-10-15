@@ -13,6 +13,7 @@ export const formatDateTime = fmtFp('yyyy-MM-dd HH:mm');
 export const formatISOdate = fmtFp("yyyy-MM-dd'T'HH:mm:ss.SSS");
 const loadedDate = new Date();
 export const dispDate = (dat, base = loadedDate) => {
+  if (!dat) return 'undefined';
   const tdat = parseISO(dat);
   const fmt = differenceInMonths(base, tdat) > 6 ? "dd MMM '`'yy" : 'dd MMM HH:mm';
   return format(tdat, fmt);

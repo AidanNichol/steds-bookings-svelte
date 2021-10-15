@@ -25,6 +25,7 @@
   logit('currentWalk', currentWalk);
 
   const byNameR = (a, b) => a.Member.sortName.localeCompare(b.Member.sortName);
+  const byUpdatedAt = (a, b) => a.updatedAt.localeCompare(b.updatedAt);
   const parseData = (data) => {
     const res = [[], [], []];
     data.forEach((item) => {
@@ -35,7 +36,8 @@
     return res;
   };
   let bookings;
-  let busBookings, carBookings, waitingList, free;
+  let free;
+  // let busBookings, carBookings, waitingList, free;
   const getParsedData = async (currentWalk) => {
     let bookings = await fetchData('booking/buslist/' + currentWalk.walkId);
     logit('useFetchData', bookings);
@@ -54,6 +56,7 @@
     extractAnnotations(waitingList);
     logit('extract Annotations', annotations, busBookings, waitingList);
     busBookings.sort(byNameR);
+    waitingList.sort(byUpdatedAt);
     logit('preStatus', currentWalk);
     free = currentWalk.capacity - currentWalk.booked;
     logit('getParsedData', {

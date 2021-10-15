@@ -62,9 +62,11 @@ export default {
         'src/images/fa-subset/js-packages/@fortawesome/pro-regular-svg-icons/*.js',
         'src/images/fa-subset/js-packages/@fortawesome/pro-solid-svg-icons/*.js',
         'src/images/fa-subset/js-packages/@fortawesome/pro-duotone-svg-icons/*.js',
+        'src/images/fontawesome-subset/js-packages/@fortawesome/fontawesome-svg-core/*.*',
         'src/images/fontawesome-subset/js-packages/@fortawesome/pro-regular-svg-icons/*.js',
         'src/images/fontawesome-subset/js-packages/@fortawesome/pro-solid-svg-icons/*.js',
         'src/images/fontawesome-subset/js-packages/@fortawesome/pro-duotone-svg-icons/*.js',
+        'src/images/Subset.zip',
       ],
       extensions: [
         '.js',

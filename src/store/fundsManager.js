@@ -236,7 +236,7 @@ const createRefund = (draft, payload) => {
 */
 export const processDeletePayment = (draft, paymentId) => {
   const payment = draft.payments[paymentId];
-  logit('deleteing payment', current(payment));
+  logit('deleteing payment', current(draft).payments[paymentId]);
   for (const alloc of payment.Allocations || []) {
     const bkng = draft.bookings[alloc.bookingId];
     bkng.owing += alloc.amount;

@@ -117,6 +117,14 @@
                   <span>£{booking.amount}</span>
                 </div>
               {/each}
+              {#if payment.available > 0}
+                <div class="detail">
+                  {payment.displayDate}
+                  <Icon name={payment.req} width="16" />
+                  <span class="text" />
+                  <span>£{payment.available}</span>
+                </div>
+              {/if}
             </div>
           {/each}
         </div>

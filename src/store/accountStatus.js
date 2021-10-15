@@ -48,6 +48,16 @@ export const endDate = writable('9999-99-99');
 export const startDate = writable('0000-00-00');
 export const bStale = writable(true);
 export const pStale = writable(true);
+export const loadingBookings = writable(false);
+export const loadingPayments = writable(false);
+export const isLoading = derived(
+  [loadingBookings, loadingPayments],
+  ([$loadingBookings, $loadingPayments], set) => {
+    set($loadingBookings || $loadingPayments);
+  },
+  false,
+);
+export const loading = writable(false);
 
 export const accountId = derived(
   [currentMemberId, nameIndex],
@@ -59,6 +69,8 @@ export const accountId = derived(
     logit('setting accountId', $memberId, accountId);
     bStale.set(true);
     pStale.set(true);
+    loadingBookings.set(true);
+    loadingPayments.set(true);
     set(accountId);
     return;
   },
@@ -127,8 +139,9 @@ let bookingData = {
   paymentsStack: [],
   lastAction: '',
 };
-export const nextBookingState = writable(null);
 
+let currentBookingsAccount = null;
+export const nextBookingState = writable(null);
 export const activeBookings = derived(
   [accountId, bStale, startDate, nextBookingState],
   async ([$accountId, $bStale, $startDate, $nextBookingState], set) => {
@@ -142,7 +155,9 @@ export const activeBookings = derived(
     if ($bStale === false) return;
     if ($startDate === '0000-00-00') return;
     if (!$accountId || !$startDate) return;
-    set([]);
+    // const accountId = $nameIndex?.get($memberId)?.accountId;
+    if (currentBookingsAccount !== $accountId) set([]);
+    currentBookingsAccount = $accountId;
     let account = await fetchData(`account/activeBookings/${$accountId}/${$startDate}`);
     let bookings = flattenBookings(account);
 
@@ -150,10 +165,15 @@ export const activeBookings = derived(
     // const fm = initalizeFundsManagment(bookings);
 
     bStale.set(false);
+    loadingBookings.set(false);
+
     set(bookings);
   },
   [],
 );
+
+let currentPaymentsAccount = null;
+
 export const nextPaymentState = writable(null);
 export const activePayments = derived(
   [accountId, pStale, startDate, nextPaymentState],
@@ -168,12 +188,16 @@ export const activePayments = derived(
     if ($pStale === false) return;
 
     if (!$accountId || !$startDate) return;
-    set([]);
+    if (currentPaymentsAccount !== $accountId) set([]);
+    currentPaymentsAccount = $accountId;
+    // set([]);
     let account = await fetchData(`account/activePayments/${$accountId}/${$startDate}`);
     let payments = account.Payments;
 
     pStale.set(false);
+
     set(payments);
+    loadingPayments.set(false);
   },
   [],
 );
@@ -199,6 +223,8 @@ function flattenBookings(acc) {
 //   },
 //   [],
 // );
+let historicBookingsAccount = null;
+
 export const historicBookings = derived(
   [startDate, endDate, accountId],
   async ([$startDate, $endDate, $accountId], set) => {
@@ -206,7 +232,9 @@ export const historicBookings = derived(
       set([]);
       return;
     }
-    set([]);
+    if (historicBookingsAccount !== $accountId) set([]);
+    historicBookingsAccount = $accountId;
+
     const res = await fetchData(
       `account/bookingsData/${$accountId}/${$startDate}/${$endDate}`,
     );

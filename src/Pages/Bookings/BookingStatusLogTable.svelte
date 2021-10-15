@@ -10,6 +10,7 @@
     accountId,
     applyBookingChange,
     deletePayment,
+    isLoading,
   } from '@store/accountStatus';
   import { latestBanking } from '@store/banking';
   import _ from 'lodash';
@@ -32,6 +33,7 @@
   // $: balance = $bookings
   //   .filter((l) => (l?.balance ?? 0) !== 0)
   //   .reduce((t, l) => t + l.balance, 0);
+  $: logit('isLoading', $isLoading);
   $: balance = $fundsManager.balance;
   $: credits = $fundsManager.paymentsStack.map((p) => $fundsManager.payments[p]);
   $: console.log('credits', credits, balance);
@@ -76,24 +78,10 @@
     logit('myAllocs2', allocations);
     allocations = Object.values(allocations).map((as) => {
       let amount = as.reduce((acc, all) => acc + all.amount, 0);
-      // const pay = as[0]?.Payment;
-      const {
-        paymentId,
-        req = 'P',
-        amount: tot = '?',
-        note,
-        bankingId,
-      } = as[0]?.Payment ?? {};
-      return { paymentId, req, tot, amount, note, deletable: !bankingId };
-      // return {
-      //   paymentId: pay.paymentId,
-
-      //   req: pay?.req ?? 'P',
-      //   tot: pay?.amount ?? '?',
-      //   note: pay?.note??'',
-      //   amount,
-      //   deletable: !pay?.bankingId,
-      // };
+      const { paymentId } = as[0] ?? {};
+      const { req = 'P', amount: tot = '?', bankingId } = as[0]?.Payment ?? {};
+      const deletable = !bankingId;
+      return { paymentId, req, tot, amount, deletable };
     });
     logit('myAllocs3', allocations);
     return allocations;
@@ -122,108 +110,114 @@
       </div>
     </div>
   {/if}
-  {#each $bookings as [walkId, mBookings], i}
-    <div class=" bookingBlock" class:historic={isHistoric(mBookings)}>
-      <div class="head">
-        <span>{walkId.substr(1)}</span><span>{$index.get(walkId)?.venue}</span>
-      </div>
-      <div class="bookings">
-        {#each mBookings as booking}
-          <div class="booking" class:hoverable={booking.BookingLogs.length > 1}>
-            {#if booking.BookingLogs.length > 1}
-              <div class="fullBookings">
-                {#each booking.BookingLogs.slice(0, -1) as log}
-                  <div>
-                    <span>{dispDate(log.id)}</span>
-                    <span class="icon">{@html svgMap[log.req]}</span>
-                    {shortNames[booking.bookingId.substr(11)]}
-                  </div>
-                {/each}
-              </div>
-            {/if}
-            <span class="uparrow">{booking.BookingLogs.length > 1 ? '▲' : ' '}</span>
-            <span>{dispDate(_.last(booking.BookingLogs).id)}</span>
-            <span class="icon" class:reset={booking.status === 'BL'}
-              >{@html svgMap[booking.status]}
-              <span class="resetLate" on:click={() => resetLate(booking)}>
-                {@html svgMap.BL}{@html svgMap.long_arrow_right}{@html svgMap.BX}
-              </span>
-            </span>
-            <!-- <Icon name={booking.status} class="icon" /> -->
-            {shortNames[booking.bookingId.substr(11)]}
-          </div>
-        {/each}
-      </div>
-      <div class="payments">
-        {#each preparePayments(mBookings) as pay}
-          <div
-            class:highlight={highlight?.paymentId === pay.paymentId}
-            on:click={() => setHighlightDate(pay)}
-          >
-            <span class="payDate">{dispDate(pay.paymentId)}</span>
-            <span class="icon">{@html svgMap[pay.req]}</span>
+  {#if $accountId && $isLoading}
+    <div class="loading">{@html svgMap.userWait}loading</div>
+  {:else}
+    {#each $bookings as [walkId, mBookings], i}
+      <div class=" bookingBlock" class:historic={isHistoric(mBookings)}>
+        <div class="head">
+          <span>{walkId.substr(1)}</span><span>{$index.get(walkId)?.venue}</span>
+        </div>
 
-            <!-- <Icon name={pay.req} class="icon" /> -->
-            <span>{pay.amount}</span>
-            {#if pay.amount !== pay.tot}
-              <span>(*{pay.tot})</span>
-            {/if}
-            {#if pay.note}
-              <div class="note">
-                <Marquee text={pay.note} />
-              </div>
-            {/if}
-          </div>
-        {/each}
-        {#if owing(mBookings) > 0}
-          <div>Owed £{owing(mBookings)}</div>
+        <div class="bookings">
+          {#each mBookings as booking}
+            <div class="booking" class:hoverable={booking.BookingLogs.length > 1}>
+              {#if booking.BookingLogs.length > 1}
+                <div class="fullBookings">
+                  {#each booking.BookingLogs.slice(0, -1) as log}
+                    <div>
+                      <span>{dispDate(log.id)}</span>
+                      <span class="icon">{@html svgMap[log.req]}</span>
+                      {shortNames[booking.bookingId.substr(11)]}
+                    </div>
+                  {/each}
+                </div>
+              {/if}
+              <span class="uparrow">{booking.BookingLogs.length > 1 ? '▲' : ' '}</span>
+              <span>{dispDate(_.last(booking.BookingLogs).id)}</span>
+              <span class="icon" class:reset={booking.status === 'BL'}
+                >{@html svgMap[booking.status]}
+                <span class="resetLate" on:click={() => resetLate(booking)}>
+                  {@html svgMap.BL}{@html svgMap.long_arrow_right}{@html svgMap.BX}
+                </span>
+              </span>
+              <!-- <Icon name={booking.status} class="icon" /> -->
+              {shortNames[booking.bookingId.substr(11)]}
+            </div>
+          {/each}
+        </div>
+        <div class="payments">
+          {#each preparePayments(mBookings) as pay}
+            <div
+              class:highlight={highlight?.paymentId === pay.paymentId}
+              on:click={() => setHighlightDate(pay)}
+            >
+              <span class="payDate">{dispDate(pay.paymentId)}</span>
+              <span class="icon">{@html svgMap[pay.req]}</span>
+
+              <!-- <Icon name={pay.req} class="icon" /> -->
+              <span>{pay.amount}</span>
+              {#if pay.amount !== pay.tot}
+                <span>(*{pay.tot})</span>
+              {/if}
+              {#if pay.note}
+                <div class="note">
+                  <Marquee text={pay.note} />
+                </div>
+              {/if}
+            </div>
+          {/each}
+          {#if owing(mBookings) > 0}
+            <div>Owed £{owing(mBookings)}</div>
+          {/if}
+        </div>
+
+        {#if owing(mBookings) == 0}
+          <div class="ok">✔︎</div>
         {/if}
       </div>
-      {#if owing(mBookings) == 0}
-        <div class="ok">✔︎</div>
-      {/if}
-    </div>
-  {/each}
-  {#if credits.length > 0}
-    <div class=" bookingBlock">
-      <div class="head right">
-        <span>Credits Available</span>
+    {/each}
+    {#if credits.length > 0}
+      <div class=" bookingBlock">
+        <div class="head right">
+          <span>Credits Available</span>
+        </div>
       </div>
-    </div>
-    <div class=" bookingBlock">
-      <div class="payments">
-        {#each credits as pay}
-          <div class:highlight={highlight?.paymentId === pay.paymentId}>
-            <span
-              class="payDate"
-              on:click={() => setHighlightDate({ ...pay, deletable: true })}
-              >{dispDate(pay.paymentId)}</span
-            >
-            <span class="icon">{@html svgMap[pay.req]}</span>
+      <div class=" bookingBlock">
+        <div class="payments">
+          {#each credits as pay}
+            <div class:highlight={highlight?.paymentId === pay.paymentId}>
+              <span
+                class="payDate"
+                on:click={() => setHighlightDate({ ...pay, deletable: true })}
+                >{dispDate(pay.paymentId)}</span
+              >
+              <span class="icon">{@html svgMap[pay.req]}</span>
 
-            <!-- <Icon name={pay.req} class="icon" /> -->
-            <span>{pay.available}</span>
-            {#if pay.amount !== pay.available}
-              <span>(*{pay.amount})</span>
-            {/if}
-            {#if pay.note}
-              <div class="note">
-                <Marquee text={pay.note} />
-              </div>
-            {/if}
-          </div>
-        {/each}
+              <!-- <Icon name={pay.req} class="icon" /> -->
+              <span>{pay.available}</span>
+              {#if pay.amount !== pay.available}
+                <span>(*{pay.amount})</span>
+              {/if}
+              {#if pay.note}
+                <div class="note">
+                  <Marquee text={pay.note} />
+                </div>
+              {/if}
+            </div>
+          {/each}
+        </div>
       </div>
-    </div>
-  {/if}
+    {/if}
 
-  {#if balance !== 0}
-    <div class=" bookingBlock">
-      <div class="payments total">
-        <div class="Btitle">{balance < 0 ? 'Owing ' : 'Credit '}</div>
-        <div class="Balance" class:debt={balance < 0}>{` £${Math.abs(balance)}`}</div>
+    {#if balance !== 0}
+      <div class=" bookingBlock">
+        <div class="payments total">
+          <div class="Btitle">{balance < 0 ? 'Owing ' : 'Credit '}</div>
+          <div class="Balance" class:debt={balance < 0}>{` £${Math.abs(balance)}`}</div>
+        </div>
       </div>
-    </div>
+    {/if}
   {/if}
 </div>
 
@@ -380,5 +374,9 @@
     height: 10px;
     overflow: hidden;
     padding-top: 5px;
+  }
+  .loading {
+    font-size: 4em;
+    text-align: center;
   }
 </style>

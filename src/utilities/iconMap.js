@@ -88,6 +88,10 @@ const afIcons = {
     { icon: ['fad', 'user'], color: 'red' },
     { icon: ['fas', 'times'], transform: { size: 17 } },
   ],
+  userWait: [
+    { icon: ['fad', 'spinner'], classes: ['fa-spin'] },
+    { icon: ['fad', 'user'], transform: { size: 8 } },
+  ],
 };
 ['B', 'C', 'W', 'T', 'P', '+'].forEach(
   (ky) => (afIcons[ky + 'X'] = _.flatten([afIcons[ky], X])),

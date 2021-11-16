@@ -74,7 +74,7 @@
 
 <style>
   .member-list {
-    width: 1225px;
+    /* width: 1225px; */
     display: grid;
     align-items: center;
     grid-gap: 0;

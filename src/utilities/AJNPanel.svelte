@@ -26,7 +26,8 @@
     flex-direction: column; */
     display: grid;
     grid-template-rows: auto minmax(0, 1fr);
-    align-item: stretch;
+    grid-template-columns: minmax(0, 1fr);
+    /* align-item: stretch; */
     box-sizing: border-box;
     margin-bottom: 10px;
     border-width: 2px;

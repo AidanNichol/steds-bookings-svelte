@@ -9,13 +9,13 @@ const X = [
   { icon: ['fas', 'slash'], color: 'red', transform: { size: 13, x: -2 } },
 ];
 const afIcons = {
-  B: { icon: ['fad', 'bus'], color: 'green' },
+  B: { icon: ['fad', 'bus-alt'], color: 'green' },
   C: { icon: ['fad', 'car-side'], color: 'blue' },
   W: { icon: ['fad', 'clock'] },
   T: { icon: ['ajn', 'treasurer'] },
   P: { icon: ['fas', 'pound-sign'], transform: { size: 19, x: 2 } },
   // '+': {icon:['ajn', 'credit']},
-  BL: [{ icon: ['fad', 'bus'], color: 'orange' }, ...X],
+  BL: [{ icon: ['fad', 'bus-alt'], color: 'orange' }, ...X],
   '+': { icon: ['ajn', 'credit'] },
 
   A: { icon: ['fad', 'edit'] },

@@ -35,7 +35,7 @@
 
   const userWait = [
     { icon: ['fad', 'spinner'], classes: ['fa-spin'] },
-    { icon: ['fad', 'user'], transform: { size: 8 } },
+    { icon: ['fad', 'bus-alt'], transform: { size: 8 } },
   ];
   const testIcon = buildIcon('userWait', userWait);
   const testIcon2 = layer((push) => {

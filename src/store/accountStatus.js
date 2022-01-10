@@ -145,10 +145,16 @@ export const nextBookingState = writable(null);
 export const activeBookings = derived(
   [accountId, bStale, startDate, nextBookingState],
   async ([$accountId, $bStale, $startDate, $nextBookingState], set) => {
-    logit('activeBookings', $nextBookingState, $bStale, $startDate);
+    logit('activeBookings changed', $bStale, $startDate, $accountId, $nextBookingState);
     if ($nextBookingState) {
-      set($nextBookingState);
-      nextBookingState.set(null);
+      let timer;
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        set($nextBookingState);
+
+        nextBookingState.set(null);
+      }, 100);
+
       // $nextBookingState = null;
       return;
     }
@@ -178,7 +184,7 @@ export const nextPaymentState = writable(null);
 export const activePayments = derived(
   [accountId, pStale, startDate, nextPaymentState],
   async ([$accountId, $pStale, $startDate, $nextPaymentState], set) => {
-    logit('activePayments', $nextPaymentState, $pStale, $startDate);
+    logit('activePayments changed', $pStale, $startDate, $accountId, $nextPaymentState);
     if ($nextPaymentState) {
       set($nextPaymentState);
       nextPaymentState.set(null);
@@ -283,9 +289,9 @@ export const bookingLogData = derived(
     ┃             update functions                      ┃
     ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 */
-const createUpdateFunction = (process) => {
+const createUpdateFunction = (process, name) => {
   return (payload) => {
-    logit('dispatchPayload', payload);
+    logit(name, payload);
     const fm = get(fundsManager);
     const [nextState, ...patches] = produceWithPatches(fm, (draft) =>
       process(draft, payload),
@@ -294,25 +300,51 @@ const createUpdateFunction = (process) => {
     if (patches[0].length === 0) return;
     patches[2] = accountId;
     addToPatchesQueue(patches);
-    logit('nextState', nextState, patches);
+    logit(name + ' nextState', nextState, patches);
     nextBookingState.set(Object.values(nextState.bookings));
     nextPaymentState.set(Object.values(nextState.payments));
   };
 };
-export const applyBookingChange = createUpdateFunction(bookingChange);
-export const applyAnnotateBooking = createUpdateFunction(annotateBooking);
-export const applyPaymentReceived = createUpdateFunction(paymentReceived);
-export const reAllocateFunds = createUpdateFunction(allocateFunds);
-export const deletePayment = createUpdateFunction(processDeletePayment);
+export const applyBookingChange = createUpdateFunction(
+  bookingChange,
+  'applyBookingChange',
+);
+export const applyAnnotateBooking = createUpdateFunction(
+  annotateBooking,
+  'applyAnnotateBooking',
+);
+export const applyPaymentReceived = createUpdateFunction(
+  paymentReceived,
+  'applyPaymentReceived',
+);
+export const reAllocateFunds = createUpdateFunction(allocateFunds, 'reAllocateFunds');
+export const deletePayment = createUpdateFunction(processDeletePayment, 'deletePayment');
 /* 
     ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
     ┃             funds manager functions               ┃
     ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 */
 export const fundsManager = derived(
-  [accountId, activeBookings, activePayments, accountMembers],
-  async ([$accountId, $activeBookings, $activePayments, $accountMembers], set) => {
-    if (!$accountId) return;
+  [
+    accountId,
+    activeBookings,
+    activePayments,
+    accountMembers,
+    nextBookingState,
+    nextPaymentState,
+  ],
+  async (
+    [
+      $accountId,
+      $activeBookings,
+      $activePayments,
+      $accountMembers,
+      $nextBookingState,
+      $nextPaymentState,
+    ],
+    set,
+  ) => {
+    if (!$accountId || $nextPaymentState || $nextBookingState) return;
     logit('fundsManger', $activeBookings, $activePayments);
     const fm = initalizeFundsManagment($activeBookings, $activePayments);
     fm.Members = $accountMembers;

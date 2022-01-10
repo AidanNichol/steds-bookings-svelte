@@ -8,7 +8,7 @@
     "sourceType": "module"
   },
   "plugins": ["svelte3"],
-  "extends": ["eslint:recommended"],
+  "extends": ["plugin:compat/recommended","eslint:recommended"],
   "overrides": [
     {
       "files": ["**/*.svelte"],

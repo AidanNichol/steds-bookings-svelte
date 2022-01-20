@@ -40,7 +40,7 @@ export const bankMoney = async (paid, paidTotal, totalDebt, totalCredit) => {
       patches.push({
         op: 'update',
         path: ['Payment', p.paymentId, 'bankingId'],
-        value: timeS,
+        value: 'BP' + timeS,
       }),
     );
   });

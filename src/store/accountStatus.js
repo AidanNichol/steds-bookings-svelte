@@ -12,10 +12,10 @@ import {
 import { format, addDays } from 'date-fns';
 import { currentMemberId } from './memberCurrent';
 import { addToQueue as addToPatchesQueue } from './patches';
+// import { prepareUserTransactionData } from './prepareUserTransactionData';
 
 import _ from 'lodash';
 import Logit from '@utils/logit';
-// import { listenerCount } from 'process';
 
 var logit = Logit('store/accountStatus');
 enablePatches();
@@ -23,55 +23,26 @@ enablePatches();
     ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
     ┃                    stores                         ┃
     ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
- \                               startDate &
- \                               accountId                endDate
- \                               ┃  ┃   ┃                    ┃
- \                     ┏━━━━━━━━━┛  ┃   ┗━━━━━━━━━━━━━━┓     ┃
- \   nextPaymentState  ┃            ┃ nextBookingState ┃     ┃ 
- \           ┃  pStale ┃  bStale    ┃    ┃             ┃     ┃ 
- \           ┃     ┃   ┃      ┃     ┃    ┃             ┃     ┃ 
- \        activePayments     activeBookings      historicBookings
- \               ┃               ┃    ┃              ┃
- \               ┃     ┏━━━━━━━━━┛    ┃        ┏━━━━━┛
- \               ┃     ┃              ┃        ┃ 
- \           fundsManager           BookingLogData
 */
 export const sortFn = writable('byDate');
 // ! from endDate to startDate goes forward in time
 export const endDate = writable('9999-99-99');
-// const startDate = readable('0000-00-00', async (set) => {
-//   const res = await fetchData(`walk/firstBooking`);
-//   logit('getStartDate fetchData returned', res);
-//   const { firstBooking } = res?.[0];
-//   set(firstBooking);
-// });
+
 export const startDate = writable('0000-00-00');
-export const bStale = writable(true);
-export const pStale = writable(true);
-export const loadingBookings = writable(false);
-export const loadingPayments = writable(false);
-export const isLoading = derived(
-  [loadingBookings, loadingPayments],
-  ([$loadingBookings, $loadingPayments], set) => {
-    set($loadingBookings || $loadingPayments);
-  },
-  false,
-);
-export const loading = writable(false);
+
+export const isLoading = writable(false);
 
 export const accountId = derived(
   [currentMemberId, nameIndex],
-  ([$memberId, $nameIndex], set) => {
+  async ([$memberId, $nameIndex], set) => {
     logit('seting accountId', $memberId, $nameIndex?.get($memberId));
     endDate.set('9999-99-99');
-    nextBookingState.set(null);
+
     const accountId = $nameIndex?.get($memberId)?.accountId;
     logit('setting accountId', $memberId, accountId);
-    bStale.set(true);
-    pStale.set(true);
-    loadingBookings.set(true);
-    loadingPayments.set(true);
+
     set(accountId);
+    await getAccountData(accountId);
     return;
   },
 );
@@ -90,6 +61,24 @@ export const accountMembers = derived(
   },
   [],
 );
+let fmData = {
+  balance: 0,
+  status: [],
+  Members: [],
+  bookings: {},
+  payments: {},
+  bookingsStack: [],
+  paymentsStack: [],
+  lastAction: '',
+};
+
+export const fundsManager = writable(fmData);
+
+/*
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃                     Actions                       ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+*/
 export const refreshAccountBookings = (data) => {
   let refAccountId = data.accountId;
   if (data.memberId) {
@@ -97,23 +86,9 @@ export const refreshAccountBookings = (data) => {
   }
   const currAccountId = get(accountId);
   logit('refreshAccountBooking', data, currAccountId, refAccountId);
-  // const thisAccount = data.accountId === currAccountId || memAccountId === currAccountId;
   if (refAccountId !== currAccountId) return;
-  // if (data.memberId || data.payments) {
-  bStale.set(true);
-  logit('bStale now', get(bStale));
-  // }
-  // if (data.accountId || data.payments) {
-  pStale.set(true);
-  logit('pStale now', get(pStale));
-  // }
+  getAccountData(currAccountId);
 };
-
-/*
-┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃                     Actions                       ┃
-┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
-*/
 
 /*
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
@@ -129,109 +104,49 @@ export const getStartDate = async () => {
   startDate.set(firstBooking);
   return firstBooking;
 };
-let bookingData = {
-  balance: 0,
-  status: [],
-  Members: [],
-  bookings: {},
-  payments: {},
-  bookingsStack: [],
-  paymentsStack: [],
-  lastAction: '',
+/*
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃             Get Bookings/Payment Data             ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+*/
+
+const getAccountData = async (accountId) => {
+  const sDate = get(startDate);
+  logit('getting account data', accountId, sDate);
+  if (!accountId || !sDate) return;
+  if (sDate === '0000-00-00') return;
+  // const accountId = $nameIndex?.get($memberId)?.accountId;
+  isLoading.set(true);
+
+  let [accountBookings, accountPayments] = await Promise.all([
+    fetchData(`account/activeBookings/${accountId}/${sDate}`),
+    fetchData(`account/activePayments/${accountId}/${sDate}`),
+  ]);
+  let bookings = flattenBookings(accountBookings);
+  let payments = accountPayments.Payments;
+  const fm = initalizeFundsManagment(bookings, payments);
+  logit('new FundsManager', fm);
+  fundsManager.set(fm);
+  reAllocateFunds(fm);
+  isLoading.set(false);
+
+  return { bookings, payments };
 };
 
-let currentBookingsAccount = null;
-export const nextBookingState = writable(null);
-export const activeBookings = derived(
-  [accountId, bStale, startDate, nextBookingState],
-  async ([$accountId, $bStale, $startDate, $nextBookingState], set) => {
-    logit('activeBookings changed', $bStale, $startDate, $accountId, $nextBookingState);
-    if ($nextBookingState) {
-      let timer;
-      clearTimeout(timer);
-      timer = setTimeout(() => {
-        set($nextBookingState);
-
-        nextBookingState.set(null);
-      }, 100);
-
-      // $nextBookingState = null;
-      return;
-    }
-    if ($bStale === false) return;
-    if ($startDate === '0000-00-00') return;
-    if (!$accountId || !$startDate) return;
-    // const accountId = $nameIndex?.get($memberId)?.accountId;
-    if (currentBookingsAccount !== $accountId) set([]);
-    currentBookingsAccount = $accountId;
-    let account = await fetchData(`account/activeBookings/${$accountId}/${$startDate}`);
-    let bookings = flattenBookings(account);
-
-    logit('activeBookings fetchData returned', bookings);
-    // const fm = initalizeFundsManagment(bookings);
-
-    bStale.set(false);
-    loadingBookings.set(false);
-
-    set(bookings);
-  },
-  [],
-);
-
-let currentPaymentsAccount = null;
-
-export const nextPaymentState = writable(null);
-export const activePayments = derived(
-  [accountId, pStale, startDate, nextPaymentState],
-  async ([$accountId, $pStale, $startDate, $nextPaymentState], set) => {
-    logit('activePayments changed', $pStale, $startDate, $accountId, $nextPaymentState);
-    if ($nextPaymentState) {
-      set($nextPaymentState);
-      nextPaymentState.set(null);
-      // $nextPaymentState = null;
-      return;
-    }
-    if ($pStale === false) return;
-
-    if (!$accountId || !$startDate) return;
-    if (currentPaymentsAccount !== $accountId) set([]);
-    currentPaymentsAccount = $accountId;
-    // set([]);
-    let account = await fetchData(`account/activePayments/${$accountId}/${$startDate}`);
-    let payments = account.Payments;
-
-    pStale.set(false);
-
-    set(payments);
-    loadingPayments.set(false);
-  },
-  [],
-);
 function flattenBookings(acc) {
   let bookings = acc.Members.map((member) => member.Bookings ?? []).flat();
   bookings = _.sortBy(bookings, 'walkId');
   return bookings;
 }
-// export const historicData = derived(
-//   [startDate, endDate, accountId],
-//   async ([$startDate, $endDate, $accountId], set) => {
-//     if ($endDate === '9999-99-99' || !$accountId) {
-//       set([]);
-//       return;
-//     }
 
-//     let res = await fetchData(
-//       `account/bookingsData/${$accountId}/${$startDate}/${$endDate}`,
-//     );
-//     res = flattenBookings(res);
-//     logit('fetch bookings Data returned', `${$accountId}/${$startDate}/${$endDate}`, res);
-//     set(res);
-//   },
-//   [],
-// );
+/*
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃               historicBookingsAccount             ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+*/
 let historicBookingsAccount = null;
 
-export const historicBookings = derived(
+const historicBookings = derived(
   [startDate, endDate, accountId],
   async ([$startDate, $endDate, $accountId], set) => {
     if ($endDate === '9999-99-99' || !$accountId) {
@@ -252,28 +167,17 @@ export const historicBookings = derived(
 );
 
 /*
-┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃               historicLogs                        ┃
-┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
-*/
-// export const historicLogs = derived([historicData, sortFn], ([$data, $sortFn]) => {
-//   const pymts = preparePayments($data.Payments, $sortFn, true);
-//   const rfnds = prepareRefunds($data.Refunds, $sortFn, true);
-//   logit('effect2', pymts, rfnds);
-//   return [...pymts, ...rfnds];
-// });
-
-/*
     ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
     ┃             bookingLogData                        ┃
     ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 */
 export const bookingLogData = derived(
-  [historicBookings, activeBookings],
-  ([$historicBookings, $activeBookings]) => {
-    logit('bookingLogData', $historicBookings, $activeBookings);
+  [historicBookings, fundsManager],
+  ([$historicBookings, $fundsManager]) => {
+    const activeBookings = _.values($fundsManager.bookings) ?? [];
+    logit('bookingLogData', $historicBookings, activeBookings);
 
-    let bookings = [...$historicBookings, ...$activeBookings];
+    let bookings = [...$historicBookings, ...activeBookings];
     // logit('bookingLogs pre setLogs', { pLogs, bLogs, $historicLogs: $historicBookings, logs: bookings });
     bookings = _.uniqBy(bookings, 'bookingId');
     bookings = _.groupBy(bookings, 'walkId');
@@ -284,6 +188,44 @@ export const bookingLogData = derived(
     return bookings;
   },
 );
+/*
+    ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+    ┃             userTransactionData                   ┃
+    ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+*/
+// export const activityLogData = derived(
+//   [historicBookings, fundsManager],
+//   ([$historicBookings, $fundsManager]) => {
+//     const activeBookings = _.values($fundsManager.bookings) ?? [];
+//     const activePayments = _.values($fundsManager.payments) ?? [];
+//     logit('bookingLogData', $historicBookings, activeBookings);
+
+//     let bookings = [...$historicBookings, ...activeBookings];
+//     return prepareUserTransactionData(bookings, activePayments);
+//   },
+// );
+/*
+    ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+    ┃             paymentLogData                        ┃
+    ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+*/
+export const paymentLogData = derived(
+  [historicBookings, fundsManager],
+  ([$historicBookings, $fundsManager]) => {
+    const activePayments = _.values($fundsManager.bookings) ?? [];
+    logit('bookingLogData', $historicBookings, activePayments);
+
+    let payments = [...$historicBookings, ...activePayments];
+    // logit('bookingLogs pre setLogs', { pLogs, bLogs, $historicLogs: $historicBookings, logs: bookings });
+    payments = _.uniqBy(payments, 'paymentId');
+    payments = _.groupBy(payments, 'walkId');
+    payments = _.toPairs(payments);
+    payments = _.sortBy(payments, 'paymentId');
+    // bookings = _.map(bookings, b=>b[1])
+    logit('paymentLogs post effect', { payments: payments });
+    return payments;
+  },
+);
 /* 
     ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
     ┃             update functions                      ┃
@@ -292,7 +234,7 @@ export const bookingLogData = derived(
 const createUpdateFunction = (process, name) => {
   return (payload) => {
     logit(name, payload);
-    const fm = get(fundsManager);
+    let fm = get(fundsManager);
     const [nextState, ...patches] = produceWithPatches(fm, (draft) =>
       process(draft, payload),
     );
@@ -301,8 +243,12 @@ const createUpdateFunction = (process, name) => {
     patches[2] = accountId;
     addToPatchesQueue(patches);
     logit(name + ' nextState', nextState, patches);
-    nextBookingState.set(Object.values(nextState.bookings));
-    nextPaymentState.set(Object.values(nextState.payments));
+    fm = initalizeFundsManagment(
+      _.values(nextState.bookings),
+      _.values(nextState.payments),
+    );
+
+    fundsManager.set(fm);
   };
 };
 export const applyBookingChange = createUpdateFunction(
@@ -317,43 +263,14 @@ export const applyPaymentReceived = createUpdateFunction(
   paymentReceived,
   'applyPaymentReceived',
 );
-export const reAllocateFunds = createUpdateFunction(allocateFunds, 'reAllocateFunds');
+const reAllocateFunds = createUpdateFunction(allocateFunds, 'reAllocateFunds');
 export const deletePayment = createUpdateFunction(processDeletePayment, 'deletePayment');
 /* 
     ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
     ┃             funds manager functions               ┃
     ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 */
-export const fundsManager = derived(
-  [
-    accountId,
-    activeBookings,
-    activePayments,
-    accountMembers,
-    nextBookingState,
-    nextPaymentState,
-  ],
-  async (
-    [
-      $accountId,
-      $activeBookings,
-      $activePayments,
-      $accountMembers,
-      $nextBookingState,
-      $nextPaymentState,
-    ],
-    set,
-  ) => {
-    if (!$accountId || $nextPaymentState || $nextBookingState) return;
-    logit('fundsManger', $activeBookings, $activePayments);
-    const fm = initalizeFundsManagment($activeBookings, $activePayments);
-    fm.Members = $accountMembers;
-    logit('funds manager object', fm);
-    set(fm);
-    reAllocateFunds(fm);
-  },
-  bookingData,
-);
+
 export const balance = derived(fundsManager, ($fundsManager) => $fundsManager.balance);
 function initalizeFundsManagment(activeBookings, activePayments) {
   logit('activeBookings', activeBookings);
@@ -371,9 +288,11 @@ function initalizeFundsManagment(activeBookings, activePayments) {
   const debt = bookingsStack.reduce((tot, id) => tot + bookings[id].owing, 0);
   const credit = paymentsStack.reduce((tot, id) => tot + payments[id].available, 0);
   const balance = credit - debt;
-  logit('setting account', { bookings, payments, bookingsStack, paymentsStack });
+  const Members = get(accountMembers);
+  logit('setting funds', { bookings, payments, bookingsStack, paymentsStack });
   logit('setting account', { debt, credit, balance });
   return {
+    Members,
     bookings,
     payments,
     bookingsStack,
@@ -382,29 +301,3 @@ function initalizeFundsManagment(activeBookings, activePayments) {
     lastAction: '',
   };
 }
-
-// function buildBookingData(bookings, payments) {
-//   let bookingsMap = {};
-//   const paymentsMap = _.keyBy(payments, (p) => p.paymentId);
-//   (payments || []).forEach((p) => {
-//     p.Allocations.forEach((alloc) => {
-//       const booking = alloc.Booking;
-//       if (!booking.Walk.bookable) return;
-//       const { bookingId } = booking;
-//       const myAllocs = p.Allocations.filter((a) => a.bookingId === bookingId);
-//       logit('myAllocs', bookingId, p.Allocations, myAllocs);
-//       bookings.Allocations = [
-//         ...(bookings.Allocations || []),
-//         ...p.Allocations.filter((a) => a.bookingId === bookingId),
-//       ];
-//       bookings[booking.bookingId] = booking;
-//     });
-//   });
-//   bookings.forEach((booking) => {
-//     logit('booking', booking);
-//     if (!booking.Walk.bookable && booking.owing === 0) return;
-//     bookings[booking.bookingId] = booking;
-//   });
-//   logit('bookingData1', bookings);
-//   return [bookingsMap, paymentsMap];
-// }

@@ -191,19 +191,19 @@ export const processRefund = (draft, payload) => {
   while (refundAmount > 0) {
     const paymentId = _.first(draft.paymentsStack);
     const payment = draft.payments[paymentId];
-    const amount = Math.max(refundAmount, payment.available);
+    const amount = Math.min(refundAmount, payment.available);
     payment.available -= amount;
     refundAmount -= amount;
     refund.available -= amount;
-    payment.updatedAt = latestOf(payment.updatedAt, refund.refundId);
+    payment.updatedAt = refund.updatedAt;
     const allocation = {
       paymentId,
       refundId: refund.paymentId,
       amount,
-      updatedAt: payment.updatedAt,
+      updatedAt: refund.updatedAt,
       // Payment: payment,
     };
-    payment.Allocations.push(allocation);
+    refund.Allocations.push(allocation);
 
     if (payment.available === 0) draft.paymentsStack.shift();
   }
@@ -217,12 +217,14 @@ const createRefund = (draft, payload) => {
   const { req, amount, note, accountId } = payload;
   const timeS = getTimestamp();
   const refund = {
+    paymentId: timeS,
     refundId: timeS,
     accountId,
     req,
     who: '???',
     note,
     amount,
+    Allocations: [],
     available: amount,
     updatedAt: timeS,
   };

@@ -28,7 +28,7 @@
     highlight = pay;
   };
   $: shortNames = $index.get($accountId)?.shortNames ?? {};
-
+  $: highlight = $accountId ? null : null;
   $: lastBanking = $latestBanking?.bankingId.substr(2);
   // $: balance = $bookings
   //   .filter((l) => (l?.balance ?? 0) !== 0)
@@ -36,25 +36,22 @@
   $: logit('isLoading', $isLoading);
   $: balance = $fundsManager.balance;
   $: credits = $fundsManager.paymentsStack.map((p) => $fundsManager.payments[p]);
+  $: refunds = prepareRefunds($fundsManager);
   $: console.log('credits', credits, balance);
   $: logit('TheTable', { logs: $bookings, props: $$props, lastBanking, shortNames });
-  $: console.table(
-    $bookings.map((l) =>
-      _.pick(l, [
-        'id',
-        'walkId',
-        'venue',
-        'req',
-        'fee',
-        'balance',
-        'owing',
-        'late',
-        'name',
-        'amount',
-        'ruleAfter',
-      ]),
-    ),
-  );
+  $: console.table($bookings, [
+    'id',
+    'walkId',
+    'venue',
+    'req',
+    'fee',
+    'balance',
+    'owing',
+    'late',
+    'name',
+    'amount',
+    'ruleAfter',
+  ]);
 
   const resetLate = (booking) => {
     const { memberId, walkId } = booking;
@@ -70,6 +67,24 @@
     ) {
       deletePayment(highlight.paymentId);
     }
+  };
+  const prepareRefunds = ({ payments }) => {
+    const isRefund = (p) => /.X$/.test(p.req);
+    let refunds = _.keyBy(_.filter(payments, isRefund), 'paymentId');
+    logit('refunds', refunds, payments);
+
+    let refundAllocs = _.flatMap(payments, (o) => o.Allocations);
+    logit('refundAllocs 1', refundAllocs);
+    refundAllocs = _.filter(refundAllocs, (a) => !!a.refundId);
+    logit('refundAllocs 2', refundAllocs);
+    refundAllocs = _.groupBy(refundAllocs, 'refundId');
+    logit('refundAllocs 3', refundAllocs);
+    for (const [refundId, allocs] of _.toPairs(refundAllocs)) {
+      logit('add allocations', refundId, allocs, refunds[refundId]);
+      refunds[refundId] = { ...refunds[refundId], Allocations: allocs };
+    }
+
+    return _.values(refunds);
   };
   const preparePayments = (mBookings) => {
     let allocations = mBookings.map((b) => b.Allocations).flat();
@@ -167,6 +182,7 @@
               {/if}
             </div>
           {/each}
+
           {#if owing(mBookings) > 0}
             <div>Owed £{owing(mBookings)}</div>
           {/if}
@@ -209,7 +225,37 @@
         </div>
       </div>
     {/if}
+    {#each refunds as refund}
+      <div class="bookingBlock">
+        <div class="head">
+          <span>{dispDate(refund.paymentId)} Refund £{refund.amount}</span>
+          <span class="icon">{@html svgMap[refund.req]} </span>
+        </div>
+        <div class="payments">
+          {#each refund.Allocations as pay}
+            <div class:highlight={highlight?.paymentId === pay.paymentId}>
+              <span
+                class="payDate"
+                on:click={() => setHighlightDate({ ...pay, deletable: true })}
+                >{dispDate(pay.paymentId)}</span
+              >
+              <span class="icon">{@html svgMap[refund.req]}</span>
 
+              <!-- <Icon name={pay.req} class="icon" /> -->
+              <span>{pay.amount}</span>
+              {#if refund.amount !== refund.available}
+                <span>(*{refund.amount})</span>
+              {/if}
+              {#if refund.note}
+                <div class="note">
+                  <Marquee text={refund.note} />
+                </div>
+              {/if}
+            </div>
+          {/each}
+        </div>
+      </div>
+    {/each}
     {#if balance !== 0}
       <div class=" bookingBlock">
         <div class="payments total">

@@ -13,7 +13,7 @@
     suspended = member.suspended ? 'suspended' : '';
     name = member.firstName;
     let { showState } = getSubsStatus(member);
-    delS = delSettings[showState];
+    delS = delSettings[showState] || {};
     logit('delS', name, suspended, showState, delS);
   }
 

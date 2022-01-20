@@ -2,8 +2,9 @@
   // import TheTable from './PaymentStatusLogTable.svelte';
   import TheTable from './BookingStatusLogTable.svelte';
   import { today, adjustMonths } from '@utils/dateFns';
-  import { sortFn, endDate, accountId } from '@store/accountStatus';
+  import { sortFn, endDate, startDate, accountId } from '@store/accountStatus';
   import { firstBookingDate } from '@store/store';
+  import { svgMap } from '@utils/iconMap';
 
   // import '@utils/logsTable.scss';
 
@@ -42,6 +43,15 @@
     <div class="logText">Event</div>
     <!-- <div class='logAmount'>Exp.</div>
         <div class='logAmount'>Inc.</div> -->
+    <a
+      class="print"
+      href={`/bookingsServer/bookings/account/userTransactionsRpt/${$accountId}/${$startDate}/${'2021-01-01'}`}
+      title="Print Activity Report"
+      target="_blank"
+      ><span>
+        {@html svgMap.Printer}
+      </span>
+    </a>
     <div class="logBal" title="sort by payment" on:click={() => sortFn.set('byPymt')}>
       Balance
     </div>
@@ -76,7 +86,7 @@
     min-height: 30px;
     height: 30px;
     display: grid;
-    grid-template-columns: 150px 180px 70px 120px;
+    grid-template-columns: 150px 100px 80px 70px 120px;
     align-items: center;
     padding: 0 4px;
   }

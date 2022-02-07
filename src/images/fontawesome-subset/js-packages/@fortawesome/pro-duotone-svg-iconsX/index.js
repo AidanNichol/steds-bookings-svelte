@@ -50,11 +50,6 @@
     iconName: 'edit',
     icon: [576, 512, [], "f044", ["M564.6 60.2l-48.8-48.8a39.11 39.11 0 0 0-55.2 0l-35.4 35.4a9.78 9.78 0 0 0 0 13.8l90.2 90.2a9.78 9.78 0 0 0 13.8 0l35.4-35.4a39.11 39.11 0 0 0 0-55.2zM427.5 297.6l-40 40a12.3 12.3 0 0 0-3.5 8.5v101.8H64v-320h229.8a12.3 12.3 0 0 0 8.5-3.5l40-40a12 12 0 0 0-8.5-20.5H48a48 48 0 0 0-48 48v352a48 48 0 0 0 48 48h352a48 48 0 0 0 48-48V306.1a12 12 0 0 0-20.5-8.5z", "M492.8 173.3a9.78 9.78 0 0 1 0 13.8L274.4 405.5l-92.8 10.3a19.45 19.45 0 0 1-21.5-21.5l10.3-92.8L388.8 83.1a9.78 9.78 0 0 1 13.8 0z"]]
   };
-  var faFileAlt = {
-    prefix: 'fad',
-    iconName: 'file-alt',
-    icon: [384, 512, [], "f15c", ["M384 128H272a16 16 0 0 1-16-16V0H24A23.94 23.94 0 0 0 0 23.88V488a23.94 23.94 0 0 0 23.88 24H360a23.94 23.94 0 0 0 24-23.88V128zm-96 244a12 12 0 0 1-12 12H108a12 12 0 0 1-12-12v-8a12 12 0 0 1 12-12h168a12 12 0 0 1 12 12zm0-64a12 12 0 0 1-12 12H108a12 12 0 0 1-12-12v-8a12 12 0 0 1 12-12h168a12 12 0 0 1 12 12zm0-64a12 12 0 0 1-12 12H108a12 12 0 0 1-12-12v-8a12 12 0 0 1 12-12h168a12 12 0 0 1 12 12z", "M377 105L279.1 7a24 24 0 0 0-17-7H256v112a16 16 0 0 0 16 16h112v-6.1a23.9 23.9 0 0 0-7-16.9zM276 352H108a12 12 0 0 0-12 12v8a12 12 0 0 0 12 12h168a12 12 0 0 0 12-12v-8a12 12 0 0 0-12-12zm0-64H108a12 12 0 0 0-12 12v8a12 12 0 0 0 12 12h168a12 12 0 0 0 12-12v-8a12 12 0 0 0-12-12zm0-64H108a12 12 0 0 0-12 12v8a12 12 0 0 0 12 12h168a12 12 0 0 0 12-12v-8a12 12 0 0 0-12-12z"]]
-  };
   var faInfoCircle = {
     prefix: 'fad',
     iconName: 'info-circle',
@@ -64,11 +59,6 @@
     prefix: 'fad',
     iconName: 'info-square',
     icon: [448, 512, [], "f30f", ["M400 32H48A48 48 0 0 0 0 80v352a48 48 0 0 0 48 48h352a48 48 0 0 0 48-48V80a48 48 0 0 0-48-48zm-176 86a42 42 0 1 1-42 42 42 42 0 0 1 42-42zm56 254a12 12 0 0 1-12 12h-88a12 12 0 0 1-12-12v-24a12 12 0 0 1 12-12h12v-64h-12a12 12 0 0 1-12-12v-24a12 12 0 0 1 12-12h64a12 12 0 0 1 12 12v100h12a12 12 0 0 1 12 12z", "M224 202a42 42 0 1 0-42-42 42 42 0 0 0 42 42zm44 134h-12V236a12 12 0 0 0-12-12h-64a12 12 0 0 0-12 12v24a12 12 0 0 0 12 12h12v64h-12a12 12 0 0 0-12 12v24a12 12 0 0 0 12 12h88a12 12 0 0 0 12-12v-24a12 12 0 0 0-12-12z"]]
-  };
-  var faListAlt = {
-    prefix: 'fad',
-    iconName: 'list-alt',
-    icon: [512, 512, [], "f022", ["M464 32H48A48 48 0 0 0 0 80v352a48 48 0 0 0 48 48h416a48 48 0 0 0 48-48V80a48 48 0 0 0-48-48zM128 392a40 40 0 1 1 40-40 40 40 0 0 1-40 40zm0-96a40 40 0 1 1 40-40 40 40 0 0 1-40 40zm0-96a40 40 0 1 1 40-40 40 40 0 0 1-40 40zm288 168a12 12 0 0 1-12 12H204a12 12 0 0 1-12-12v-32a12 12 0 0 1 12-12h200a12 12 0 0 1 12 12zm0-96a12 12 0 0 1-12 12H204a12 12 0 0 1-12-12v-32a12 12 0 0 1 12-12h200a12 12 0 0 1 12 12zm0-96a12 12 0 0 1-12 12H204a12 12 0 0 1-12-12v-32a12 12 0 0 1 12-12h200a12 12 0 0 1 12 12z", "M128 200a40 40 0 1 0-40-40 40 40 0 0 0 40 40zm0 16a40 40 0 1 0 40 40 40 40 0 0 0-40-40zm0 96a40 40 0 1 0 40 40 40 40 0 0 0-40-40z"]]
   };
   var faLongArrowRight = {
     prefix: 'fad',
@@ -145,10 +135,8 @@
     faCircle: faCircle,
     faClock: faClock,
     faEdit: faEdit,
-    faFileAlt: faFileAlt,
     faInfoCircle: faInfoCircle,
     faInfoSquare: faInfoSquare,
-    faListAlt: faListAlt,
     faLongArrowRight: faLongArrowRight,
     faPrint: faPrint,
     faSack: faSack,
@@ -175,10 +163,8 @@
   exports.faCircle = faCircle;
   exports.faClock = faClock;
   exports.faEdit = faEdit;
-  exports.faFileAlt = faFileAlt;
   exports.faInfoCircle = faInfoCircle;
   exports.faInfoSquare = faInfoSquare;
-  exports.faListAlt = faListAlt;
   exports.faLongArrowRight = faLongArrowRight;
   exports.faPrint = faPrint;
   exports.faSack = faSack;

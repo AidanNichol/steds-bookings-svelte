@@ -82,3 +82,7 @@ icons:
       - regular
   - square-full:
       - regular
+  - list-alt:
+      - duotone
+  - file-alt:
+      - duotone

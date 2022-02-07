@@ -8,11 +8,13 @@ import {
   paymentReceived,
   allocateFunds,
   processDeletePayment,
+  processDeleteRefund,
 } from './fundsManager';
 import { format, addDays } from 'date-fns';
 import { currentMemberId } from './memberCurrent';
 import { addToQueue as addToPatchesQueue } from './patches';
-// import { prepareUserTransactionData } from './prepareUserTransactionData';
+import { prepareUserTransactionData } from './prepareUserTransactionData';
+import { prepareUserTransactionDataByWalkId } from './prepareUserTransactionDataByWalkId';
 
 import _ from 'lodash';
 import Logit from '@utils/logit';
@@ -25,8 +27,8 @@ enablePatches();
     ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 */
 export const sortFn = writable('byDate');
-// ! from endDate to startDate goes forward in time
-export const endDate = writable('9999-99-99');
+// ! from newStartDate to startDate goes forward in time
+export const newStartDate = writable(null);
 
 export const startDate = writable('0000-00-00');
 
@@ -36,7 +38,7 @@ export const accountId = derived(
   [currentMemberId, nameIndex],
   async ([$memberId, $nameIndex], set) => {
     logit('seting accountId', $memberId, $nameIndex?.get($memberId));
-    endDate.set('9999-99-99');
+    newStartDate.set(get(startDate));
 
     const accountId = $nameIndex?.get($memberId)?.accountId;
     logit('setting accountId', $memberId, accountId);
@@ -67,6 +69,7 @@ let fmData = {
   Members: [],
   bookings: {},
   payments: {},
+  refunds: {},
   bookingsStack: [],
   paymentsStack: [],
   lastAction: '',
@@ -95,7 +98,11 @@ export const refreshAccountBookings = (data) => {
 ┃                      Thunks                       ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 */
-
+export const setNewStartDate = async (newDate) => {
+  newStartDate.set(newDate);
+  const currAccountId = get(accountId);
+  getAccountData(currAccountId);
+};
 export const getStartDate = async () => {
   const res = await fetchData(`walk/firstBooking`);
   logit('getStartDate fetchData returned', res);
@@ -111,26 +118,23 @@ export const getStartDate = async () => {
 */
 
 const getAccountData = async (accountId) => {
-  const sDate = get(startDate);
+  const sDate = get(newStartDate);
+
   logit('getting account data', accountId, sDate);
   if (!accountId || !sDate) return;
   if (sDate === '0000-00-00') return;
   // const accountId = $nameIndex?.get($memberId)?.accountId;
   isLoading.set(true);
 
-  let [accountBookings, accountPayments] = await Promise.all([
-    fetchData(`account/activeBookings/${accountId}/${sDate}`),
-    fetchData(`account/activePayments/${accountId}/${sDate}`),
-  ]);
-  let bookings = flattenBookings(accountBookings);
-  let payments = accountPayments.Payments;
-  const fm = initalizeFundsManagment(bookings, payments);
+  let data = await fetchData(`account/activeData/${accountId}/${sDate}`);
+  let { bookings, payments, refunds } = data;
+  const fm = initalizeFundsManagment(bookings, payments, refunds);
   logit('new FundsManager', fm);
   fundsManager.set(fm);
   reAllocateFunds(fm);
   isLoading.set(false);
 
-  return { bookings, payments };
+  return { bookings, payments, refunds };
 };
 
 function flattenBookings(acc) {
@@ -147,9 +151,9 @@ function flattenBookings(acc) {
 let historicBookingsAccount = null;
 
 const historicBookings = derived(
-  [startDate, endDate, accountId],
-  async ([$startDate, $endDate, $accountId], set) => {
-    if ($endDate === '9999-99-99' || !$accountId) {
+  [startDate, newStartDate, accountId],
+  async ([$startDate, $newStartDate, $accountId], set) => {
+    if ($newStartDate === '9999-99-99' || !$accountId) {
       set([]);
       return;
     }
@@ -157,9 +161,13 @@ const historicBookings = derived(
     historicBookingsAccount = $accountId;
 
     const res = await fetchData(
-      `account/bookingsData/${$accountId}/${$startDate}/${$endDate}`,
+      `account/bookingsData/${$accountId}/${$startDate}/${$newStartDate}`,
     );
-    logit('fetch bookingsData returned', `${$accountId}/${$startDate}/${$endDate}`, res);
+    logit(
+      'fetch bookingsData returned',
+      `${$accountId}/${$startDate}/${$newStartDate}`,
+      res,
+    );
     let bookings = flattenBookings(res);
     set(bookings);
   },
@@ -175,6 +183,7 @@ export const bookingLogData = derived(
   [historicBookings, fundsManager],
   ([$historicBookings, $fundsManager]) => {
     const activeBookings = _.values($fundsManager.bookings) ?? [];
+    const refunds = _.values($fundsManager.refunds) ?? [];
     logit('bookingLogData', $historicBookings, activeBookings);
 
     let bookings = [...$historicBookings, ...activeBookings];
@@ -182,10 +191,11 @@ export const bookingLogData = derived(
     bookings = _.uniqBy(bookings, 'bookingId');
     bookings = _.groupBy(bookings, 'walkId');
     bookings = _.toPairs(bookings);
+    // bookings = refunds.map((r) => ['W' + r.refundId, [r]]);
     bookings = _.sortBy(bookings, (b) => b[0]);
     // bookings = _.map(bookings, b=>b[1])
-    logit('bookingLogs post effect', { bookings });
-    return bookings;
+    logit('bookingLogs post effect', { bookings, refunds });
+    return [bookings, refunds];
   },
 );
 /*
@@ -193,17 +203,57 @@ export const bookingLogData = derived(
     ┃             userTransactionData                   ┃
     ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 */
-// export const activityLogData = derived(
-//   [historicBookings, fundsManager],
-//   ([$historicBookings, $fundsManager]) => {
-//     const activeBookings = _.values($fundsManager.bookings) ?? [];
-//     const activePayments = _.values($fundsManager.payments) ?? [];
-//     logit('bookingLogData', $historicBookings, activeBookings);
+export const activityLogData = derived(
+  [fundsManager],
+  ([$fundsManager]) => {
+    const activeBookings = _.cloneDeep(_.values($fundsManager.bookings) ?? []);
+    const activePayments = _.cloneDeep(_.values($fundsManager.payments) ?? []);
+    const activeRefunds = _.cloneDeep(_.values($fundsManager.refunds) ?? []);
+    logit('activeLogData', activeBookings, activePayments, activeRefunds);
 
-//     let bookings = [...$historicBookings, ...activeBookings];
-//     return prepareUserTransactionData(bookings, activePayments);
-//   },
-// );
+    const result = prepareUserTransactionData(
+      accountId,
+      activeBookings,
+      activePayments,
+      activeRefunds,
+    );
+    logit('activeLogData2', { result });
+    return result;
+  },
+  {},
+);
+/*
+    ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+    ┃             userTransactionDataByWalkId           ┃
+    ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+*/
+export const activityLogDataByWalkId = derived(
+  [fundsManager],
+  ([$fundsManager]) => {
+    const activeBookings = _.cloneDeep(_.values($fundsManager.bookings) ?? []);
+    const activePayments = _.cloneDeep(_.values($fundsManager.payments) ?? []);
+    const activeRefunds = _.cloneDeep(_.values($fundsManager.refunds) ?? []);
+    logit('activeLogData', activeBookings, activePayments, activeRefunds);
+
+    const result = prepareUserTransactionDataByWalkId(
+      accountId,
+      activeBookings,
+      activePayments,
+      activeRefunds,
+    );
+    logit('activeLogData2', { result });
+    return result;
+  },
+  {},
+);
+export const testActive = derived(
+  activityLogData,
+  ($activityLogData, set) => {
+    logit('monitor activity data', $activityLogData);
+    set($activityLogData);
+  },
+  'one moment...',
+);
 /*
     ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
     ┃             paymentLogData                        ┃
@@ -265,6 +315,7 @@ export const applyPaymentReceived = createUpdateFunction(
 );
 const reAllocateFunds = createUpdateFunction(allocateFunds, 'reAllocateFunds');
 export const deletePayment = createUpdateFunction(processDeletePayment, 'deletePayment');
+export const deleteRefund = createUpdateFunction(processDeleteRefund, 'deleteRefund');
 /* 
     ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
     ┃             funds manager functions               ┃
@@ -272,11 +323,12 @@ export const deletePayment = createUpdateFunction(processDeletePayment, 'deleteP
 */
 
 export const balance = derived(fundsManager, ($fundsManager) => $fundsManager.balance);
-function initalizeFundsManagment(activeBookings, activePayments) {
+function initalizeFundsManagment(activeBookings, activePayments, activeRefunds) {
   logit('activeBookings', activeBookings);
   // activeBookings.Members.forEach((m) => bookingsData.push(...m.Bookings));
   const payments = _.keyBy(activePayments, 'paymentId');
   const bookings = _.keyBy(activeBookings, 'bookingId');
+  const refunds = _.keyBy(activeRefunds, 'refundId');
   // const [bookings, payments] = buildBookingData(activeBookings, paymentsData);
   logit('activeBookings', activeBookings);
   const bookingsStack = activeBookings
@@ -295,6 +347,7 @@ function initalizeFundsManagment(activeBookings, activePayments) {
     Members,
     bookings,
     payments,
+    refunds,
     bookingsStack,
     paymentsStack,
     balance,

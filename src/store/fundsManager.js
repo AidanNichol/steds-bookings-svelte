@@ -106,7 +106,14 @@ const upsertBooking = (draft, payload) => {
   const bookingId = walkId + memberId;
   let booking = draft.bookings[bookingId];
   if (!booking) {
-    booking = { bookingId, walkId, memberId, BookingLogs: [], Allocations: [] };
+    booking = {
+      bookingId,
+      walkId,
+      memberId,
+      BookingLogs: [],
+      Allocations: [],
+      createdAt: dat,
+    };
     logit('booking 1', booking, dat);
   } else logit('booking 1', current(booking), dat);
   if (req === booking.status) return null;
@@ -189,6 +196,7 @@ export const processRefund = (draft, payload) => {
   const refund = createRefund(draft, payload);
   let refundAmount = refund.amount;
   while (refundAmount > 0) {
+    logit('process refund', refund, [...draft.paymentsStack]);
     const paymentId = _.first(draft.paymentsStack);
     const payment = draft.payments[paymentId];
     const amount = Math.min(refundAmount, payment.available);
@@ -198,12 +206,13 @@ export const processRefund = (draft, payload) => {
     payment.updatedAt = refund.updatedAt;
     const allocation = {
       paymentId,
-      refundId: refund.paymentId,
+      refundId: refund.refundId,
       amount,
-      updatedAt: refund.updatedAt,
+      updatedAt: refund.refundId,
       // Payment: payment,
     };
     refund.Allocations.push(allocation);
+    payment.Allocations.push(allocation);
 
     if (payment.available === 0) draft.paymentsStack.shift();
   }
@@ -217,7 +226,6 @@ const createRefund = (draft, payload) => {
   const { req, amount, note, accountId } = payload;
   const timeS = getTimestamp();
   const refund = {
-    paymentId: timeS,
     refundId: timeS,
     accountId,
     req,
@@ -226,9 +234,8 @@ const createRefund = (draft, payload) => {
     amount,
     Allocations: [],
     available: amount,
-    updatedAt: timeS,
   };
-  draft.payments[timeS] = refund;
+  draft.refunds[timeS] = refund;
   return refund;
 };
 /*
@@ -246,6 +253,24 @@ export const processDeletePayment = (draft, paymentId) => {
   draft.paymentsStack = draft.paymentsStack.filter((pymntId) => pymntId !== paymentId);
 
   delete draft.payments[paymentId];
+};
+
+/*
+    ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+    ┃          processDeleteRefund                   ┃
+    ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+*/
+export const processDeleteRefund = (draft, refundId) => {
+  const refund = draft.refunds[refundId];
+  logit('deleteing refund', current(draft).refunds[refundId]);
+  for (const alloc of refund.Allocations || []) {
+    const payment = draft.payments[alloc.paymentId];
+    payment.available += alloc.amount;
+    draft.paymentsStack = [...draft.paymentsStack, payment.paymentId];
+  }
+  draft.paymentsStack = _.sortedUniq(draft.paymentsStack);
+
+  delete draft.refunds[refundId];
 };
 
 /*

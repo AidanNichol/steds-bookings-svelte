@@ -103,6 +103,21 @@ const expandPatch = (arr) => {
       delete value.Allocations;
     }
 
+    if (path[0] === 'refunds' && path[2] === 'Allocations') return;
+    // if (path[0] === 'refunds' && path[2] === 'Allocations') {
+    //   p.path = ['Allocation'];
+    //   if (!_.isArray(p.value)) p.value = [value];
+    //   p.value.forEach((v) => delete v.Payment);
+
+    //   return newPatches.push(p);
+    // }
+    if (path[0] === 'refunds') path[0] = 'Refund';
+    if (path[0] === 'Refund' && path.length < 3 && value) {
+      logit('refunds', p);
+
+      delete value.Allocations;
+    }
+
     newPatches.push(p);
   });
   logit('patches.out', debug(newPatches));

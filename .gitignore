@@ -9,3 +9,4 @@ yarn-error.*
 .env
 testReport.pdf
 src/images/Subset.zip
+src/images/fontawesome-subset *

@@ -1,8 +1,10 @@
 <script>
-  // import TheTable from './PaymentStatusLogTable.svelte';
-  import TheTable from './BookingStatusLogTable.svelte';
+  import TheTable2 from './TransactionsStatusLogTable2.svelte';
+  import { printTransactionReport } from './TransactionsStatusLogTable2.svelte';
+  import TheTable3 from './TransactionsStatusLogTable.svelte';
+  import TheTable1 from './BookingStatusLogTable.svelte';
   import { today, adjustMonths } from '@utils/dateFns';
-  import { sortFn, endDate, startDate, accountId } from '@store/accountStatus';
+  import { sortFn, accountId, name, setNewStartDate } from '@store/accountStatus';
   import { firstBookingDate } from '@store/store';
   import { svgMap } from '@utils/iconMap';
 
@@ -10,8 +12,9 @@
 
   import Logit from '@utils/logit';
   var logit = Logit('pages/bookings/PaymentStatusLog');
+  let TheTable = TheTable1;
 
-  $: logit('account ChangeLogR start', $sortFn, $endDate);
+  $: logit('account ChangeLogR start', $sortFn);
   let historyDate = 'current';
   $: if ($accountId) historyDate = 'current';
   $: if (historyDate) {
@@ -19,9 +22,17 @@
     logit('selected', diff);
     const newDate = diff === 0 ? firstBookingDate : adjustMonths(today(), diff);
     logit('selected', historyDate, diff);
+    setNewStartDate(newDate);
 
-    endDate.set(newDate);
+    // endDate.set(newDate);
   }
+  let reportNo = 1;
+  $: TheTable = [TheTable1, TheTable2, TheTable3][reportNo];
+  const cycleReport = () => {
+    reportNo = (reportNo + 1) % 3;
+    logit('ReportNo', reportNo);
+    TheTable = [TheTable1, TheTable2, TheTable3][reportNo];
+  };
   const handleChange = (event) => {
     const range = event.target.value;
     logit('selectedHC', event.target.value);
@@ -30,28 +41,41 @@
     logit('selectedHC', diff);
     const newDate = diff === 0 ? firstBookingDate : adjustMonths(today(), diff);
     logit('selectedHC', event.target.value, range, diff);
-
-    endDate.set(newDate);
+    setNewStartDate(newDate);
+    // startDate.set(newDate);
+  };
+  const onPrint = () => {
+    printTransactionReport($accountId, $name);
   };
 </script>
 
 <div class={'Table ' + ($$props.class ?? '')}>
   <div class="logHeader">
+    <div on:click={cycleReport} class="clickable">
+      {@html svgMap.file_alt}
+    </div>
     <div class="logDate" title="sort by date" on:click={() => sortFn.set('byDate')}>
       Date
     </div>
     <div class="logText">Event</div>
     <!-- <div class='logAmount'>Exp.</div>
         <div class='logAmount'>Inc.</div> -->
-    <a
-      class="print"
+    {#if reportNo === 1}
+      <span class="print clickable" on:click={onPrint} title="Print Activity Report">
+        {@html svgMap.Printer}
+      </span>
+    {:else}
+      <div>&nbsp</div>
+    {/if}
+    <!-- <a
+      class="print clickable"
       href={`/bookingsServer/bookings/account/userTransactionsRpt/${$accountId}/${$startDate}/${'2021-01-01'}`}
       title="Print Activity Report"
       target="_blank"
       ><span>
         {@html svgMap.Printer}
       </span>
-    </a>
+    </a> -->
     <div class="logBal" title="sort by payment" on:click={() => sortFn.set('byPymt')}>
       Balance
     </div>
@@ -63,10 +87,13 @@
       <option value="all">All</option>
     </select>
   </div>
-  <TheTable />
+  <svelte:component this={TheTable} />
 </div>
 
 <style lang="postcss">
+  .clickable {
+    cursor: pointer;
+  }
   div.Btitle {
     justify-self: flex-end;
     font-weight: bold;
@@ -86,7 +113,7 @@
     min-height: 30px;
     height: 30px;
     display: grid;
-    grid-template-columns: 150px 100px 80px 70px 120px;
+    grid-template-columns: 20px 130px 100px 80px 70px 120px;
     align-items: center;
     padding: 0 4px;
   }

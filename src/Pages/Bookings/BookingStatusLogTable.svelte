@@ -5,7 +5,7 @@
   import { dispDate, todaysDate } from '@utils/dateFns';
   import { nameIndex as index } from '@store/nameIndex';
   import {
-    bookingLogData as bookings,
+    bookingLogData,
     fundsManager,
     accountId,
     applyBookingChange,
@@ -27,19 +27,20 @@
   const setHighlightDate = (pay = null) => {
     highlight = pay;
   };
+  $: [bookings, refunds] = $bookingLogData || [];
   $: shortNames = $index.get($accountId)?.shortNames ?? {};
   $: highlight = $accountId ? null : null;
   $: lastBanking = $latestBanking?.bankingId.substr(2);
-  // $: balance = $bookings
+  // $: balance = bookings
   //   .filter((l) => (l?.balance ?? 0) !== 0)
   //   .reduce((t, l) => t + l.balance, 0);
   $: logit('isLoading', $isLoading);
   $: balance = $fundsManager.balance;
   $: credits = $fundsManager.paymentsStack.map((p) => $fundsManager.payments[p]);
-  $: refunds = prepareRefunds($fundsManager);
+  // $: refunds = prepareRefunds($fundsManager);
   $: console.log('credits', credits, balance);
-  $: logit('TheTable', { logs: $bookings, props: $$props, lastBanking, shortNames });
-  $: console.table($bookings, [
+  $: logit('TheTable', { logs: bookings, props: $$props, lastBanking, shortNames });
+  $: console.table(bookings, [
     'id',
     'walkId',
     'venue',
@@ -68,24 +69,24 @@
       deletePayment(highlight.paymentId);
     }
   };
-  const prepareRefunds = ({ payments }) => {
-    const isRefund = (p) => /.X$/.test(p.req);
-    let refunds = _.keyBy(_.filter(payments, isRefund), 'paymentId');
-    logit('refunds', refunds, payments);
+  // const prepareRefunds = ({ payments }) => {
+  //   const isRefund = (p) => /.X$/.test(p.req);
+  //   let refunds = _.keyBy(_.filter(payments, isRefund), 'paymentId');
+  //   logit('refunds', refunds, payments);
 
-    let refundAllocs = _.flatMap(payments, (o) => o.Allocations);
-    logit('refundAllocs 1', refundAllocs);
-    refundAllocs = _.filter(refundAllocs, (a) => !!a.refundId);
-    logit('refundAllocs 2', refundAllocs);
-    refundAllocs = _.groupBy(refundAllocs, 'refundId');
-    logit('refundAllocs 3', refundAllocs);
-    for (const [refundId, allocs] of _.toPairs(refundAllocs)) {
-      logit('add allocations', refundId, allocs, refunds[refundId]);
-      refunds[refundId] = { ...refunds[refundId], Allocations: allocs };
-    }
+  //   let refundAllocs = _.flatMap(payments, (o) => o.Allocations);
+  //   logit('refundAllocs 1', refundAllocs);
+  //   refundAllocs = _.filter(refundAllocs, (a) => !!a.refundId);
+  //   logit('refundAllocs 2', refundAllocs);
+  //   refundAllocs = _.groupBy(refundAllocs, 'refundId');
+  //   logit('refundAllocs 3', refundAllocs);
+  //   for (const [refundId, allocs] of _.toPairs(refundAllocs)) {
+  //     logit('add allocations', refundId, allocs, refunds[refundId]);
+  //     refunds[refundId] = { ...refunds[refundId], Allocations: allocs };
+  //   }
 
-    return _.values(refunds);
-  };
+  //   return _.values(refunds);
+  // };
   const preparePayments = (mBookings) => {
     let allocations = mBookings.map((b) => b.Allocations).flat();
     logit('myAllocs', allocations);
@@ -128,7 +129,7 @@
   {#if $accountId && $isLoading}
     <div class="loading">{@html svgMap.userWait}loading</div>
   {:else}
-    {#each $bookings as [walkId, mBookings], i}
+    {#each bookings as [walkId, mBookings], i}
       <div class=" bookingBlock" class:historic={isHistoric(mBookings)}>
         <div class="head">
           <span>{walkId.substr(1)}</span><span>{$index.get(walkId)?.venue}</span>
@@ -228,7 +229,7 @@
     {#each refunds as refund}
       <div class="bookingBlock">
         <div class="head">
-          <span>{dispDate(refund.paymentId)} Refund £{refund.amount}</span>
+          <span>{dispDate(refund.refundId)} Refund £{refund.amount}</span>
           <span class="icon">{@html svgMap[refund.req]} </span>
         </div>
         <div class="payments">

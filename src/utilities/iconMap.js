@@ -38,6 +38,7 @@ const afIcons = {
   square_full: { icon: ['far', 'square-full'] },
   long_arrow_down: { icon: ['far', 'long-arrow-down'] },
   long_arrow_right: { icon: ['fad', 'long-arrow-right'] },
+  file_alt: { icon: ['fad', 'file-alt'] },
   // fasLongArrowRight: { icon: ['fas', 'long-arrow-right'] },
   // farLongArrowRight: { icon: ['far', 'long-arrow-right'] },
   page_up: { icon: ['fad', 'arrow-alt-up'] },

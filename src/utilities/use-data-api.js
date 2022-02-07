@@ -53,4 +53,6 @@ function sleeper(ms) {
 export const fetchData = (url) => getRequest('bookings/' + url);
 export const fetchAuth = (url) => getRequest('auth/' + url);
 export const postData = (data) => postRequest('bookings/patches', data);
+export const postTransRpt = (data) => postRequest('bookings/account/transRpt', data);
+export const postTransRpt3 = (data) => postRequest('bookings/account/transRpt3', data);
 export const postAuth = (data) => postRequest('auth/login', data);

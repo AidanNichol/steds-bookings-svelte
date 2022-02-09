@@ -30,7 +30,7 @@ function reducedIncomeAllocations(allocs, lastBooking) {
 
   allocs.forEach((alloc) => {
     const item = expendIndex[alloc.bookingId || alloc.refundId];
-    alloc.historic = item?.Allocations.find((a) => a.id === alloc.id).historic;
+    alloc.historic = item?.Allocations.find((a) => a.id === alloc.id)?.historic;
     const itemCreatedAt = (item || {}).createdAt || alloc.refundId;
     // let id = alloc.id.toString().padStart(5, '0');
     alloc.paidFor = `${itemCreatedAt.substr(0, 10)}.${alloc.bookingId}`;
@@ -157,7 +157,7 @@ function mapEntries(entries) {
   const entryIndex = _.fromPairs(entries);
 
   for (let [day, { lastPayment }] of entries) {
-    if (lastPayment && entryIndex[lastPayment].lastBooking === day) {
+    if (lastPayment && entryIndex[lastPayment]?.lastBooking === day) {
       entryIndex[day].breakNo = breakNo;
       entryIndex[lastPayment].breakNo = breakNo;
       breaks[breakNo] = [0, 0, day, lastPayment];

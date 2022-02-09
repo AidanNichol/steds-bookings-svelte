@@ -37,7 +37,7 @@ function reducedIncomeAllocations(allocs, lastBooking) {
 
   allocs.forEach((alloc) => {
     const item = expendIndex[alloc.bookingId || alloc.refundId];
-    alloc.historic = item?.Allocations.find((a) => a.id === alloc.id).historic;
+    alloc.historic = item?.Allocations.find((a) => a.id === alloc.id)?.historic;
     alloc.paidFor = alloc.bookingId || 'W' + alloc.refundId;
   });
   allocs = _.sortBy(allocs, 'paidFor');
@@ -230,11 +230,15 @@ function mapEntries(entries) {
     }
   }
   // @ calculate sizes
+
+  const twoLines = (exp) =>
+    exp.log2.length > 4 || (exp.log2.length === 4 && exp.name.length > 6);
   for (const [, entry] of entries) {
     entry.expSz = entry.expenditure.length ? 1 : 0;
     entry.incSz = entry.income.length ? 1 : 0;
     for (const exp of entry.expenditure) {
       exp.sz = Math.max(exp.Allocations.length, 1);
+      if (exp.sz === 1 && twoLines(exp)) exp.sz += 1;
       entry.expSz += exp.sz;
     }
     for (const inc of entry.income) {
@@ -269,9 +273,13 @@ function mapEntries(entries) {
       eY = y + 1;
       for (const exp of expenditure) {
         exp.y = eY;
+        const adjust = twoLines(exp) ? 0.5 : 0;
+        exp.y1 = eY + exp.sz / 2 - adjust;
+        exp.y2 = eY + exp.sz / 2 + adjust;
+        exp.y3 = eY + (exp.sz > exp.Allocations.length ? 1 : 0);
 
         exp.Allocations.forEach(({ id, historic }, i) => {
-          if (id) lines[id] = { ...(lines[id] || {}), end: eY + i + 0.5, historic };
+          if (id) lines[id] = { ...(lines[id] || {}), end: exp.y3 + i + 0.5, historic };
         });
         // expSz += exp.sz;
         eY += exp.sz;

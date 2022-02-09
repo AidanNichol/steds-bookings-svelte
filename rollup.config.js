@@ -59,6 +59,8 @@ export default {
   plugins: [
     findUnused({
       exclude: [
+        'src/**/*.xjs',
+        'src/**/*.svelteX',
         'src/images/fa-subset/js-packages/@fortawesome/pro-regular-svg-icons/*.js',
         'src/images/fa-subset/js-packages/@fortawesome/pro-solid-svg-icons/*.js',
         'src/images/fa-subset/js-packages/@fortawesome/pro-duotone-svg-icons/*.js',
@@ -117,12 +119,18 @@ export default {
       dedupe: ['svelte'],
     }),
     commonjs(),
-    injectProcessEnv({
-      NODE_ENV: production ? 'production' : 'development',
-      DEBUG: '*',
-      SOME_OBJECT: { one: 1, two: [1, 2], three: '3' },
-      UNUSED: null,
-    }),
+    !production &&
+      injectProcessEnv({
+        NODE_ENV: 'development',
+        DEBUG: '*',
+        SOME_OBJECT: { one: 1, two: [1, 2], three: '3' },
+        UNUSED: null,
+      }),
+    production &&
+      injectProcessEnv({
+        NODE_ENV: 'production',
+        DEBUG: '*',
+      }),
     // generateSW({
     //   swDest: 'public/sw.js',
     //   globDirectory: 'public/',

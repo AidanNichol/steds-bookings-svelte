@@ -50,6 +50,8 @@
     transform: scale(1.4);
     background-color: #f5edc3;
     border: thin black solid;
+    position: relative;
+    top: -4px;
   }
 
   .bookingcell:hover .hotRow {

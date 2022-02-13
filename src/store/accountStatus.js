@@ -34,6 +34,10 @@ export const startDate = writable('0000-00-00');
 
 export const isLoading = writable(false);
 
+export const sortByWalk = writable(true);
+
+export const showByWalk = writable(true);
+
 export const accountId = derived(
   [currentMemberId, nameIndex],
   async ([$memberId, $nameIndex], set) => {
@@ -228,8 +232,8 @@ export const activityLogData = derived(
     ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 */
 export const activityLogDataByWalkId = derived(
-  [fundsManager],
-  ([$fundsManager]) => {
+  [fundsManager, sortByWalk, showByWalk],
+  ([$fundsManager, $sortByWalk, $showByWalk]) => {
     const activeBookings = _.cloneDeep(_.values($fundsManager.bookings) ?? []);
     const activePayments = _.cloneDeep(_.values($fundsManager.payments) ?? []);
     const activeRefunds = _.cloneDeep(_.values($fundsManager.refunds) ?? []);
@@ -240,6 +244,8 @@ export const activityLogDataByWalkId = derived(
       activeBookings,
       activePayments,
       activeRefunds,
+      $sortByWalk,
+      $showByWalk,
     );
     logit('activeLogData2', { result });
     return result;

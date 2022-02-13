@@ -1,10 +1,17 @@
 <script>
   import TheTable2 from './TransactionsStatusLogTable2.svelte';
   import { printTransactionReport } from './TransactionsStatusLogTable2.svelte';
-  import TheTable3 from './TransactionsStatusLogTable.svelte';
+  // import TheTable3 from './TransactionsStatusLogTable.svelte';
   import TheTable1 from './BookingStatusLogTable.svelte';
   import { today, adjustMonths } from '@utils/dateFns';
-  import { sortFn, accountId, name, setNewStartDate } from '@store/accountStatus';
+  import {
+    sortFn,
+    accountId,
+    name,
+    setNewStartDate,
+    showByWalk,
+    sortByWalk,
+  } from '@store/accountStatus';
   import { firstBookingDate } from '@store/store';
   import { svgMap } from '@utils/iconMap';
 
@@ -27,12 +34,15 @@
     // endDate.set(newDate);
   }
   let reportNo = 1;
-  $: TheTable = [TheTable1, TheTable2, TheTable3][reportNo];
+
+  $: TheTable = [TheTable1, TheTable2][reportNo];
   const cycleReport = () => {
-    reportNo = (reportNo + 1) % 3;
+    reportNo = (reportNo + 1) % 2;
     logit('ReportNo', reportNo);
-    TheTable = [TheTable1, TheTable2, TheTable3][reportNo];
+    // TheTable = [TheTable1, TheTable2, TheTable3][reportNo];
   };
+  const toggleSortByWalk = () => ($sortByWalk = !$sortByWalk);
+  const toggleShowByWalk = () => ($showByWalk = !$showByWalk);
   const handleChange = (event) => {
     const range = event.target.value;
     logit('selectedHC', event.target.value);
@@ -49,48 +59,70 @@
   };
 </script>
 
-<div class={'Table ' + ($$props.class ?? '')}>
-  <div class="logHeader">
-    <div on:click={cycleReport} class="clickable">
-      {@html svgMap.file_alt}
-    </div>
-    <div class="logDate" title="sort by date" on:click={() => sortFn.set('byDate')}>
-      Date
-    </div>
-    <div class="logText">Event</div>
-    <!-- <div class='logAmount'>Exp.</div>
-        <div class='logAmount'>Inc.</div> -->
-    {#if reportNo === 1}
-      <span class="print clickable" on:click={onPrint} title="Print Activity Report">
-        {@html svgMap.Printer}
-      </span>
-    {:else}
-      <div>&nbsp</div>
-    {/if}
-    <!-- <a
-      class="print clickable"
-      href={`/bookingsServer/bookings/account/userTransactionsRpt/${$accountId}/${$startDate}/${'2021-01-01'}`}
-      title="Print Activity Report"
-      target="_blank"
-      ><span>
-        {@html svgMap.Printer}
-      </span>
-    </a> -->
-    <div class="logBal" title="sort by payment" on:click={() => sortFn.set('byPymt')}>
-      Balance
-    </div>
+{#if $accountId}
+  <div class={'Table ' + ($$props.class ?? '')}>
+    <div class="logHeader">
+      <div class="rptButtons">
+        <span on:click={cycleReport} class="clickable file">{@html svgMap.file_alt}</span>
+        {#if reportNo > 0}
+          <div on:click={toggleShowByWalk} class="clickable">
+            <div>Showing By</div>
+            <div>
+              {$showByWalk ? 'Walk Date' : 'Booking Date'}
+            </div>
+          </div>
+          {#if $showByWalk}
+            <div on:click={toggleSortByWalk} class="clickable">
+              <div>Sorting By</div>
+              <div>
+                {$sortByWalk ? 'Walk Date' : 'Booking Date'}
+              </div>
+            </div>
+          {/if}
+        {/if}
+      </div>
 
-    <select class="range" bind:value={historyDate} on:select={handleChange}>
-      <option value="current">Current</option>
-      <option value="SixMonths">6 Months</option>
-      <option value="OneYear">1 year</option>
-      <option value="all">All</option>
-    </select>
+      {#if reportNo === 1}
+        <span class="print clickable" on:click={onPrint} title="Print Activity Report">
+          {@html svgMap.Printer}
+        </span>
+      {:else}
+        <div>&nbsp</div>
+      {/if}
+
+      <select class="range" bind:value={historyDate} on:select={handleChange}>
+        <option value="current">Current</option>
+        <option value="SixMonths">6 Months</option>
+        <option value="OneYear">1 year</option>
+        <option value="all">All</option>
+      </select>
+    </div>
+    <svelte:component this={TheTable} {showByWalk} {sortByWalk} />
   </div>
-  <svelte:component this={TheTable} />
-</div>
+{/if}
 
 <style lang="postcss">
+  .file {
+    fill: white;
+    height: 120%;
+  }
+  .rptButtons {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 10px;
+    width: 30%;
+    & > div {
+      padding: 0 3px;
+      text-align: center;
+      font-size: 0.5em;
+      display: flex;
+      flex-direction: column;
+      border: thin solid black;
+      border-radius: 4px;
+      background-color: white;
+    }
+  }
   .clickable {
     cursor: pointer;
   }
@@ -112,9 +144,9 @@
     border-bottom: #bce8f1 solid thin;
     min-height: 30px;
     height: 30px;
-    display: grid;
-    grid-template-columns: 20px 130px 100px 80px 70px 120px;
-    align-items: center;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
     padding: 0 4px;
   }
   .range {

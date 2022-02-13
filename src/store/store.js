@@ -7,6 +7,8 @@ import { writable, get } from 'svelte/store';
 import { loadMembers } from '@store/membersList';
 import { loadWalks } from '@store/walksList';
 import { loadAccounts } from '@store/accountsList';
+import { currentMemberId } from '@store/memberCurrent';
+
 // import { banking } from './banking';
 // import { socket } from './socket';
 // import { payments } from './payments';
@@ -48,6 +50,12 @@ export const hydrate = async () => {
   // await banking.getLatestBanking();
   loading.set(false);
   loaded.set(true);
+  setTimeout(() => {
+    // currentMemberId.set('M825');
+    // currentMemberId.set('M401');
+    // currentMemberId.set('M853');
+    // currentMemberId.set('M2009');
+  }, 100);
   // await socket.load();
   // await debugSettings.load();
 };

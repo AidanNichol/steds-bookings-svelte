@@ -1,5 +1,5 @@
 <script>
-  import { format, parseISO } from 'date-fns';
+  // import { format, parseISO } from 'date-fns';
 
   export let x;
   export let y;
@@ -10,18 +10,16 @@
   let vPad = 0.15;
   let rx = 0.3;
   let center = width / 2;
-  let text;
   let headBg = 'blueBg';
   let align;
-  $: if (/^W/.test(title)) {
+  $: if (/^\d/.test(title)) {
     center = 0;
-    text = title.substr(1);
     headBg = 'biegeBg';
     align = { 'dominant-baseline': 'middle', 'text-anchor': 'start' };
   } else {
     center = width / 2;
-    text = format(parseISO(title), `EEE dd MMM ''yy`);
     align = { 'dominant-baseline': 'middle', 'text-anchor': 'middle' };
+    headBg = 'blueBg';
   }
   // $: center = ? 0: width / 2;
   // $: text = /^W/.test(title)
@@ -56,9 +54,11 @@
         Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
     }
   </style>
-  <rect x="0" y={vPad} {width} height={1 + vPad} {rx} class={headBg} />
-  <rect x="0" y={1} {width} height={vPad + 0.1} class="blank" />
-  <rect x="0" y={vPad} {width} height={height - vPad} {rx} class="line" />
-  <text x={center} y={0.6} style="font-size:0.8;" {...align}>{text}</text>
-  <line x1={0} y1={1} x2={width} y2={1} class="line" />
+  <g viewbox={`0 0 1 ${width}`}>
+    <rect x="0" y={vPad} {width} height={1 + vPad} {rx} class={headBg} />
+    <rect x="0" y={1} {width} height={vPad + 0.1} class="blank" />
+    <rect x="0" y={vPad} {width} height={height - vPad} {rx} class="line" />
+    <text x={center} y={0.6} style="font-size:0.8;" {...align}>{title}</text>
+    <line x1={0} y1={1} x2={width} y2={1} class="line" />
+  </g>
 </svg>

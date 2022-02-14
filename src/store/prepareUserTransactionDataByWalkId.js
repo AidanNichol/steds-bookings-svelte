@@ -3,8 +3,6 @@ import { addDays, format, parseISO } from 'date-fns';
 import { nameIndex } from './nameIndex.js';
 import { get } from 'svelte/store';
 import Logit from '@utils/logit';
-import { showByWalk } from './accountStatus.js';
-// import { sprintf } from 'sprintf-js';
 
 var logit = Logit('pages/bookings/PrepareTransactionsData');
 const maxString = (a, b) => (a > b ? a : b);

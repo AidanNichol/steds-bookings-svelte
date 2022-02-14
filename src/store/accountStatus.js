@@ -252,14 +252,7 @@ export const activityLogDataByWalkId = derived(
   },
   {},
 );
-export const testActive = derived(
-  activityLogData,
-  ($activityLogData, set) => {
-    logit('monitor activity data', $activityLogData);
-    set($activityLogData);
-  },
-  'one moment...',
-);
+
 /*
     ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
     ┃             paymentLogData                        ┃

@@ -27,7 +27,6 @@
   import { dispDate } from '@utils/dateFns';
   import {
     activityLogDataByWalkId,
-    testActive,
     applyBookingChange,
     deletePayment,
     deleteRefund,
@@ -51,7 +50,6 @@
 
   $: logit('Transaction Data Raw', data, $activityLogDataByWalkId);
   $: logit('Transaction Data', { entries, bot, lines, pageEnds });
-  $: logit('Transaction monitor', $testActive);
 
   const showDate = (day) => format(parseISO(day), `E dd MMM`);
   // const showDate = (day) => day;
@@ -378,15 +376,7 @@
         />
       {/if}
     {/each}
-    <!-- <use xlink:href="#Sym-B" x="19" y="4.1" width="0.8" height="0.8" /> -->
   </svg>
-  <!-- {#if footnotes.length > 0}
-    <ol>
-      {#each footnotes as note}
-        <li>{note}</li>
-      {/each}
-    </ol>
-  {/if} -->
 {/if}
 
 <style>

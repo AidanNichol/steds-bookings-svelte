@@ -13,7 +13,7 @@ import {
 import { format, addDays } from 'date-fns';
 import { currentMemberId } from './memberCurrent';
 import { addToQueue as addToPatchesQueue } from './patches';
-import { prepareUserTransactionData } from './prepareUserTransactionData';
+// import { prepareUserTransactionData } from './prepareUserTransactionData';
 import { prepareUserTransactionDataByWalkId } from './prepareUserTransactionDataByWalkId';
 
 import _ from 'lodash';
@@ -207,25 +207,25 @@ export const bookingLogData = derived(
     ┃             userTransactionData                   ┃
     ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 */
-export const activityLogData = derived(
-  [fundsManager],
-  ([$fundsManager]) => {
-    const activeBookings = _.cloneDeep(_.values($fundsManager.bookings) ?? []);
-    const activePayments = _.cloneDeep(_.values($fundsManager.payments) ?? []);
-    const activeRefunds = _.cloneDeep(_.values($fundsManager.refunds) ?? []);
-    logit('activeLogData', activeBookings, activePayments, activeRefunds);
+// export const activityLogData = derived(
+//   [fundsManager],
+//   ([$fundsManager]) => {
+//     const activeBookings = _.cloneDeep(_.values($fundsManager.bookings) ?? []);
+//     const activePayments = _.cloneDeep(_.values($fundsManager.payments) ?? []);
+//     const activeRefunds = _.cloneDeep(_.values($fundsManager.refunds) ?? []);
+//     logit('activeLogData', activeBookings, activePayments, activeRefunds);
 
-    const result = prepareUserTransactionData(
-      accountId,
-      activeBookings,
-      activePayments,
-      activeRefunds,
-    );
-    logit('activeLogData2', { result });
-    return result;
-  },
-  {},
-);
+//     const result = prepareUserTransactionData(
+//       accountId,
+//       activeBookings,
+//       activePayments,
+//       activeRefunds,
+//     );
+//     logit('activeLogData2', { result });
+//     return result;
+//   },
+//   {},
+// );
 /*
     ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
     ┃             userTransactionDataByWalkId           ┃

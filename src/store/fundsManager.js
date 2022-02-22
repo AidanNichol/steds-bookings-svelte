@@ -158,7 +158,7 @@ export const allocateFunds = (draft) => {
     payment.updatedAt = updatedAt;
     const allocation = {
       bookingId,
-      bookingTransactionDate: booking.updatedAt,
+      // bookingTransactionDate: booking.updatedAt,
       paymentId,
       amount,
       updatedAt,
@@ -307,12 +307,10 @@ export const processCancellation = (draft, booking) => {
     }
     if (amount <= 0) return;
     payment.available += alloc.amount;
-    const bookingTransactionDate = booking.updatedAt;
     amount = -1 * amount;
-    payment.updatedAt = bookingTransactionDate;
+    payment.updatedAt = booking.updatedAt;
     const reverse = {
       ...alloc,
-      bookingTransactionDate,
       amount,
       updatedAt: payment.updatedAt,
     };

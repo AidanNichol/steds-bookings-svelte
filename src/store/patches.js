@@ -55,7 +55,7 @@ export const addToQueue = (patches) => {
 const expandPatch = (arr) => {
   let [patches, unpatches] = arr;
   if (patches[0].path[0] === 'Banking') return arr;
-  const newPatches = [];
+  let newPatches = [];
   logit('patches.in', debug(patches));
   let memberId;
 
@@ -120,6 +120,18 @@ const expandPatch = (arr) => {
 
     newPatches.push(p);
   });
+  const tableSeq = {
+    Booking: '1',
+    BookingLog: '2',
+    Payment: '1',
+    Allocation: '2',
+    Account: '1',
+    Member: '2',
+  };
+  newPatches = _.sortBy(
+    newPatches,
+    (p) => (p.op === 'add' ? '0' : '1') + (tableSeq[p.path[0]] ?? '3'),
+  );
   logit('patches.out', debug(newPatches));
   newPatches.forEach((p, i) => logit('new ' + i, p.op, p.path.join('.'), p.value));
   return [newPatches, unpatches, memberId];

@@ -162,7 +162,11 @@ export function prepareUserTransactionDataByWalkId(
     let sortSeq;
     if (showByWalk) {
       title = `${walks[0].walkId.substr(1)} ${walks[0].venue}`;
-      sortSeq = createdDay2;
+      if (sortByWalk) {
+        sortSeq = `${walks[0].walkId.substr(1)}:0`;
+      } else {
+        sortSeq = createdDay2;
+      }
     } else {
       title = showDate(createdAt1);
       sortSeq = createdAt1;

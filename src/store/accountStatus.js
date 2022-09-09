@@ -60,7 +60,9 @@ export const name = derived(
 export const accountMembers = derived(
   [accountId, nameIndex],
   ([$accountId, $nameIndex], set) => {
-    if (!$accountId) return;
+    if (!$accountId) {
+      return;
+    }
     let mems = $nameIndex.get($accountId)?.Members;
     logit('accountMembers', mems);
     set(mems);
@@ -93,7 +95,9 @@ export const refreshAccountBookings = (data) => {
   }
   const currAccountId = get(accountId);
   logit('refreshAccountBooking', data, currAccountId, refAccountId);
-  if (refAccountId !== currAccountId) return;
+  if (refAccountId !== currAccountId) {
+    return;
+  }
   getAccountData(currAccountId);
 };
 
@@ -108,10 +112,12 @@ export const setNewStartDate = async (newDate) => {
   getAccountData(currAccountId);
 };
 export const getStartDate = async () => {
-  const res = await fetchData(`walk/firstBooking`);
+  const res = await fetchData('walk/firstBooking');
   logit('getStartDate fetchData returned', res);
   let { firstBooking } = res || {};
-  if (!firstBooking) firstBooking = format(addDays(new Date(), -45), 'yyyy-MM-dd');
+  if (!firstBooking) {
+    firstBooking = format(addDays(new Date(), -45), 'yyyy-MM-dd');
+  }
   startDate.set(firstBooking);
   return firstBooking;
 };
@@ -125,8 +131,12 @@ const getAccountData = async (accountId) => {
   const sDate = get(newStartDate);
 
   logit('getting account data', accountId, sDate);
-  if (!accountId || !sDate) return;
-  if (sDate === '0000-00-00') return;
+  if (!(accountId && sDate)) {
+    return;
+  }
+  if (sDate === '0000-00-00') {
+    return;
+  }
   // const accountId = $nameIndex?.get($memberId)?.accountId;
   isLoading.set(true);
 
@@ -161,7 +171,9 @@ const historicBookings = derived(
       set([]);
       return;
     }
-    if (historicBookingsAccount !== $accountId) set([]);
+    if (historicBookingsAccount !== $accountId) {
+      set([]);
+    }
     historicBookingsAccount = $accountId;
 
     const res = await fetchData(
@@ -240,7 +252,6 @@ export const activityLogDataByWalkId = derived(
     logit('activeLogData', activeBookings, activePayments, activeRefunds);
 
     const result = prepareUserTransactionDataByWalkId(
-      accountId,
       activeBookings,
       activePayments,
       activeRefunds,
@@ -288,10 +299,12 @@ const createUpdateFunction = (process, name) => {
       process(draft, payload),
     );
     logit('patches', patches);
-    if (patches[0].length === 0) return;
+    if (patches[0].length === 0) {
+      return;
+    }
     patches[2] = accountId;
     addToPatchesQueue(patches);
-    logit(name + ' nextState', nextState, patches);
+    logit(`${name} nextState`, nextState, patches);
     fm = initalizeFundsManagment(
       _.values(nextState.bookings),
       _.values(nextState.payments),

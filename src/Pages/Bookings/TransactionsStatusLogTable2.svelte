@@ -323,8 +323,8 @@
                 width={incWidth}
                 height={sz}
               >
-                <text x={incWidth - 2.1} y={y1} {...RM}>{paymentType(req)}</text>
-                <Icon {req} x={incWidth - 2.0} y={y1 - 0.49} />
+                <text x={incWidth - 2.6} y={y1} {...RM}>{paymentType(req)}</text>
+                <Icon {req} x={incWidth - 2.5} y={y1 - 0.49} />
                 <text x={incWidth - hPad} y={y1} {...RM}>{amount}</text>
 
                 {#each allocs as { id, amount, bookingId, refundId, historic }, j}
@@ -341,7 +341,7 @@
                     class="hideMe"
                     on:click={() => onDeletePayment({ paymentId, amount })}
                   >
-                    <rect x={0} {y} width={incWidth} height={sz} rx="0.3" />
+                    <rect x={0} y={0} width={incWidth} height={sz} rx="0.3" />
                     <text x={incWidth - 2.1} y={sz / 2} {...RM}>Delete? </text>
                     <Icon req="trash" x={incWidth - 2.0} y={sz / 2 - 0.49} />
                   </g>
@@ -395,6 +395,7 @@
   .clickable:hover .hideMe {
     display: block;
     cursor: pointer;
+    background-color: white;
     font-size: 1px;
     font-weight: bold;
   }

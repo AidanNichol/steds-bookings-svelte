@@ -16,7 +16,9 @@ let expendIndex = {};
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 */
 function reducedExpenditureAllocations(allocs, lastPayment) {
-  if (allocs.length === 0) return { Allocations: allocs, lastPayment };
+  if (allocs.length === 0) {
+    return { Allocations: allocs, lastPayment };
+  }
 
   allocs = _.sortBy(allocs, 'paymentId');
   const lastAlloc = _.last(allocs);
@@ -32,7 +34,9 @@ function reducedExpenditureAllocations(allocs, lastPayment) {
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 */
 function reducedIncomeAllocations(allocs, lastBooking) {
-  if (allocs.length === 0) return { Allocations: allocs, lastBooking };
+  if (allocs.length === 0) {
+    return { Allocations: allocs, lastBooking };
+  }
 
   allocs.forEach((alloc) => {
     const item = expendIndex[alloc.bookingId || alloc.refundId];
@@ -54,13 +58,21 @@ function addEntry(entries, day, type, item, title) {
   // const day = createdAt.substr(0, 10);
 
   const last = type === 'income' ? 'lastBooking' : 'lastPayment';
-  if (!entries[day]) entries[day] = { day, expenditure: [], income: [] };
+  if (!entries[day]) {
+    entries[day] = { day, expenditure: [], income: [] };
+  }
   const entry = entries[day];
-  if (_.isArray(item)) entry[type].push(...item);
-  else entry[type].push(item);
+  if (_.isArray(item)) {
+    entry[type].push(...item);
+  } else {
+    entry[type].push(item);
+  }
   entry[last] = maxString(entry[last], item[last]);
-  if (type === 'income') entry.incTitle = title;
-  else entry.expTitle = title;
+  if (type === 'income') {
+    entry.incTitle = title;
+  } else {
+    entry.expTitle = title;
+  }
   return entries[day];
 }
 // const imReady = useStoreActions((a) => a.reports.imReady);
@@ -70,7 +82,6 @@ function addEntry(entries, day, type, item, title) {
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 */
 export function prepareUserTransactionDataByWalkId(
-  accountId,
   bookingsRaw,
   paymentsRaw,
   refundsRaw,
@@ -95,7 +106,7 @@ export function prepareUserTransactionDataByWalkId(
       lastPayment,
     );
     lastPayment = allocs.lastPayment;
-    let historic = b.walkId < 'W' + today;
+    let historic = b.walkId < `W${today}`;
     b = { ...b, ...allocs, name, venue, ...prepLogs(b.BookingLogs) };
     b.Allocations.forEach((a) => (a.historic = historic));
     b.historic = historic && b.owing === 0;
@@ -108,7 +119,8 @@ export function prepareUserTransactionDataByWalkId(
     expendIndex[b.bookingId] = b;
     return b;
   });
-  let sortBy, groupBy;
+  let sortBy;
+  let groupBy;
   if (showByWalk) {
     if (sortByWalk) {
       sortBy = ['walkId', 'createdDay', 'bookingId'];
@@ -126,7 +138,7 @@ export function prepareUserTransactionDataByWalkId(
   let createdDay2 = '0000-00-00:0';
   const showDate = (dat) => {
     let [day] = dat.split(':');
-    return format(parseISO(day), `E dd MMM`);
+    return format(parseISO(day), 'E dd MMM');
   };
   const incCreatedAt = (dat) => {
     let bits = dat.split(':');
@@ -138,13 +150,18 @@ export function prepareUserTransactionDataByWalkId(
   Object.values(groupedWalks).forEach((walks) => {
     // const walks = groupedWalks[walkId];
     createdDay2 = incCreatedAt(createdDay2);
-    let createdAt1 =
-      walks.reduce((acc, w) => minString(acc, w.createdDay), '999999') + ':0';
+    let createdAt1 = `${walks.reduce(
+      (acc, w) => minString(acc, w.createdDay),
+      '999999',
+    )}:0`;
 
-    if (createdAt1 > createdDay2) createdDay2 = createdAt1;
-    let title, sortSeq;
+    if (createdAt1 > createdDay2) {
+      createdDay2 = createdAt1;
+    }
+    let title;
+    let sortSeq;
     if (showByWalk) {
-      title = walks[0].walkId.substr(1) + ' ' + walks[0].venue;
+      title = `${walks[0].walkId.substr(1)} ${walks[0].venue}`;
       sortSeq = createdDay2;
     } else {
       title = showDate(createdAt1);
@@ -164,8 +181,10 @@ export function prepareUserTransactionDataByWalkId(
   // - Refunds
   let lastBooking = '';
   refundsRaw.forEach((p) => {
-    if (!p.refundId) p.refundId = p.paymentId;
-    let createdDay = p.refundId.substr(0, 10) + ':0';
+    if (!p.refundId) {
+      p.refundId = p.paymentId;
+    }
+    let createdDay = `${p.refundId.substr(0, 10)}:0`;
     const allocs = reducedExpenditureAllocations(
       p.Allocations2 || p.Allocations || [],
       lastPayment,
@@ -186,7 +205,7 @@ export function prepareUserTransactionDataByWalkId(
 
   // - payments
   _.sortBy(paymentsRaw, 'paymentId').forEach((p) => {
-    let createdDay = p.paymentId.substr(0, 10) + ':0';
+    let createdDay = `${p.paymentId.substr(0, 10)}:0`;
     const allocs = reducedIncomeAllocations(
       p.Allocations2 || p.Allocations || [],
       lastBooking,
@@ -227,28 +246,40 @@ function mapEntries(entries, showByWalk) {
   const twoLines = (exp) => {
     let max = 5;
     if (showByWalk) {
-      if (exp.name?.length ?? 0) max -= 1;
+      if (exp.name?.length ?? 0) {
+        max--;
+      }
     } else {
       max -= Math.floor((exp.name?.length ?? 0) / 4) + 1;
     }
-    return (exp.log2?.length ?? 0) > max;
+    return (exp.log2?.pseudoN ?? 0) > max;
   };
   for (const [, entry] of entries) {
     entry.expSz = entry.expenditure.length ? 1 : 0;
     entry.incSz = entry.income.length ? 1 : 0;
     for (const exp of entry.expenditure) {
-      if (!exp.Allocations) logit('BadExp', exp);
+      if (!exp.Allocations) {
+        logit('BadExp', exp);
+      }
       exp.sz = Math.max(exp.Allocations?.length ?? 0, 1);
-      if (exp.sz === 1 && twoLines(exp)) exp.sz += 1;
+      if (exp.sz === 1 && twoLines(exp)) {
+        exp.sz += 1;
+      }
       entry.expSz += exp.sz;
-      if (exp.note) exp.footNo = footnotes.push(exp.note);
+      if (exp.note) {
+        exp.footNo = footnotes.push(exp.note);
+      }
     }
     for (const inc of entry.income) {
-      if (!inc.Allocations) logit('BadExp', inc);
+      if (!inc.Allocations) {
+        logit('BadExp', inc);
+      }
       inc.sz = Math.max(inc.Allocations?.length ?? 0, 1);
       if (inc.note) {
         inc.footNo = footnotes.push(inc.note);
-        if (inc.sz === 1) inc.sz += 1;
+        if (inc.sz === 1) {
+          inc.sz += 1;
+        }
       }
       entry.incSz += inc.sz;
     }
@@ -258,7 +289,9 @@ function mapEntries(entries, showByWalk) {
   for (let i = 0; i < entries.length; i++) {
     let newPage = false;
     const setY = (y, expSz, incSz) => {
-      if (y + expSz < pageEnd || y + incSz < pageEnd) return y;
+      if (y + expSz < pageEnd || y + incSz < pageEnd) {
+        return y;
+      }
       y = Math.max(eY, iY);
       eY = y;
       iY = y;
@@ -289,12 +322,15 @@ function mapEntries(entries, showByWalk) {
         exp.y3 = exp.sz > exp.Allocations?.length ?? 0 ? 1 : 0;
 
         exp.Allocations?.forEach(({ id, historic }, i) => {
-          if (id)
+          if (id) {
             lines[id] = { ...(lines[id] || {}), end: exp.y + exp.y3 + i + 0.5, historic };
+          }
         });
         eY += exp.sz;
       }
-    } else y = setY(iY, expSz, incSz, i);
+    } else {
+      y = setY(iY, expSz, incSz, i);
+    }
     if (income.length > 0) {
       iY = y + 1;
       for (const inc of income) {
@@ -328,14 +364,25 @@ function mapEntries(entries, showByWalk) {
 function prepLogs(logs) {
   let txt = '';
   const step = 2.4;
-  let dX = 2.6 - step;
+  let dX = 3.1 - step;
   logs = logs.filter((l, i) => l.req !== (logs[i - 1] || {}).req);
-  const log2 = logs.reverse().map((log) => {
-    dX += step;
+  let log2 = logs.map((log) => {
     txt = format(parseISO(log.id), 'd/MM');
-
-    return { txt, dX, req: log.req };
+    return { txt, req: log.req };
   });
-  _.last(log2).txt = '';
-  return { log2, maxX: dX };
+  log2 = log2.map(({ txt, req }, i) => {
+    if (i === 0 || log2[i - 1].txt === txt) {
+      txt = '';
+    }
+    return { txt, req };
+  });
+  let txtAdjust = 0;
+  log2 = log2.reverse().map(({ txt, req }) => {
+    dX += step - txtAdjust;
+    txtAdjust = txt === '' ? 1.5 : 0;
+
+    return { txt, dX, req };
+  });
+  // _.last(log2).txt = '';
+  return { log2, maxX: dX, psuedoN: (dX - 0.7) / step };
 }

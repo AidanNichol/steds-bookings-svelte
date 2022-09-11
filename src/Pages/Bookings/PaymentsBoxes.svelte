@@ -30,7 +30,7 @@
   let handleKeydown = (event) => {
     if (event.which === 13 && amount) {
       event.preventDefault();
-      amount = parseInt(amount);
+      amount = parseFloat(amount);
       applyPaymentReceived({
         amount,
         note,

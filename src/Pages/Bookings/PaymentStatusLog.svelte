@@ -65,15 +65,23 @@
       <div class="rptButtons">
         <span on:click={cycleReport} class="clickable file">{@html svgMap.file_alt}</span>
         {#if reportNo > 0}
-          <div on:click={toggleShowByWalk} class="clickable">
-            <div>Showing By</div>
+          <div
+            on:click={toggleShowByWalk}
+            class="clickable"
+            title={`change to group by ${$showByWalk ? 'Booking' : 'Walk'} Date`}
+          >
+            <div>Grouped By</div>
             <div>
               {$showByWalk ? 'Walk Date' : 'Booking Date'}
             </div>
           </div>
           {#if $showByWalk}
-            <div on:click={toggleSortByWalk} class="clickable">
-              <div>Sorting By</div>
+            <div
+              on:click={toggleSortByWalk}
+              class="clickable"
+              title={`change to sort by ${$sortByWalk ? 'Booking' : 'Walk'} Date`}
+            >
+              <div>Sorted By</div>
               <div>
                 {$sortByWalk ? 'Walk Date' : 'Booking Date'}
               </div>

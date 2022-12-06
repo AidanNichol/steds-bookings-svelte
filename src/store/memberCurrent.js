@@ -129,7 +129,9 @@ export const getSubsStatus = (mem) => {
 };
 
 const getSubsStatusBasic = (mem) => {
-  if (!mem) return { due: false, status: '?', showSubsButton: false };
+  if (!mem) {
+    return { due: false, status: '?', showSubsButton: false };
+  }
   let _today = new Date();
   // DS.todaysDate;
   let status = 'ok';
@@ -155,7 +157,7 @@ const getSubsStatusBasic = (mem) => {
   // okSubsYear - if current value is this then you get the reduced rate.
   let okSubsYear = _today < new Date(`${thisYear}-02-01`) ? thisYear - 1 : thisYear;
   let showSubsButton = _today >= new Date(`${thisYear}-12-01`) && currentUserSubs < year;
-  if (currentUserSubs >= okSubsYear) fee = 13;
+  if (currentUserSubs >= okSubsYear) fee = 15;
   // console.log({currentUserSubs, year, thisYear, dueSubsYear,  okSubsYear, showSubsButton})
   if (currentUserSubs >= year || currentUserSubs >= dueSubsYear) {
     if (showSubsButton) {
@@ -163,7 +165,7 @@ const getSubsStatusBasic = (mem) => {
     } else return { due: false, status, showSubsButton };
   }
   status = 'due';
-  if (currentUserSubs >= okSubsYear) fee = 13;
+  if (currentUserSubs >= okSubsYear) fee = 15;
   else status = 'late';
   showSubsButton = true;
   return { due: true, year, fee, status, showSubsButton };

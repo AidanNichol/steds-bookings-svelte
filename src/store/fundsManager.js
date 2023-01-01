@@ -65,7 +65,7 @@ const createPayment = (draft, payload) => {
     available: amount,
     updatedAt: timeS,
   };
-  draft.lastAction = [timeS, `${accountId}`, `payment`, `${req} £${amount}`];
+  draft.lastAction = [timeS, `${accountId}`, 'payment', `${req} £${amount}`];
 
   draft.payments[timeS] = payment;
   return payment;
@@ -119,7 +119,7 @@ const upsertBooking = (draft, payload) => {
   if (req === booking.status) return null;
   let late = booking.late || req === 'BL';
   const fee = walkFee * factor[req];
-  draft.lastAction = [dat, `${memberId} ${walkId}`, `booking`, req];
+  draft.lastAction = [dat, `${memberId} ${walkId}`, 'booking', req];
   logit('lastAction', draft.lastAction);
   let log = { id: dat, bookingId, dat, req, who: '???', fee, late };
   if (booking.status === 'BL' && req === 'BX') {
@@ -146,7 +146,7 @@ export const allocateFunds = (draft) => {
   while (true) {
     let bookingId = _.first(draft.bookingsStack);
     let paymentId = _.first(draft.paymentsStack);
-    if (!bookingId || !paymentId) break;
+    if (!(bookingId && paymentId)) break;
     const booking = draft.bookings[bookingId];
     const payment = draft.payments[paymentId];
 
@@ -252,6 +252,7 @@ export const processDeletePayment = (draft, paymentId) => {
   }
   draft.paymentsStack = draft.paymentsStack.filter((pymntId) => pymntId !== paymentId);
 
+  // rome-ignore lint/performance/noDelete: <explanation>
   delete draft.payments[paymentId];
 };
 
@@ -270,6 +271,7 @@ export const processDeleteRefund = (draft, refundId) => {
   }
   draft.paymentsStack = _.sortedUniq(draft.paymentsStack);
 
+  // rome-ignore lint/performance/noDelete: <explanation>
   delete draft.refunds[refundId];
 };
 
@@ -342,7 +344,7 @@ export const annotateBooking = (draft, payload) => {
   draft.lastAction = [
     dat,
     `${booking.memberId} ${booking.walkId}`,
-    `annotate`,
+    'annotate',
     annotation,
   ];
 

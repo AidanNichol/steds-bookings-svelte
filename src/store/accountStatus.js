@@ -152,7 +152,7 @@ const getAccountData = async (accountId) => {
 };
 
 function flattenBookings(acc) {
-  let bookings = acc.Members.map((member) => member.Bookings ?? []).flat();
+  let bookings = acc.Members.flatMap((member) => member.Bookings ?? []);
   bookings = _.sortBy(bookings, 'walkId');
   return bookings;
 }
@@ -343,7 +343,7 @@ function initalizeFundsManagment(activeBookings, activePayments, activeRefunds) 
   const refunds = _.keyBy(activeRefunds, 'refundId');
   // const [bookings, payments] = buildBookingData(activeBookings, paymentsData);
   logit('activeBookings', activeBookings);
-  const bookingsStack = activeBookings
+  const bookingsStack = _.sortBy(activeBookings, 'bookingId')
     ?.filter((b) => b.owing > 0)
     .map((b) => b.bookingId);
   const paymentsStack = activePayments

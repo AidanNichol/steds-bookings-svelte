@@ -168,6 +168,9 @@
         font-size: 0.8px;
         font-family: 'Open-sans', Roboto, sans-serif;
       }
+      text.refunded {
+        text-decoration: line-through;
+      }
       .hideMe {
         display: none;
       }
@@ -233,7 +236,7 @@
         {#if expSz > 0}
           <g class:historic={_.every(expenditure, 'historic')}>
             <DayHeader x={expLeft} {y} width={expWidth} height={expSz} title={expTitle} />
-            {#each expenditure as { walkId, status, text, createdAt, Allocations: allocs, owing, memberId, y, adjust, y1, y2, y3, sz, log2, maxX, refundId, req, amount }, i}
+            {#each expenditure as { walkId, status, text, createdAt, Allocations2: allocs, owing, memberId, y, adjust, y1, y2, y3, sz, log2, maxX, refundId, req, amount }, i}
               {@const textWidth = (expWidth - (adjust ? 0 : maxX + 1)) * unit}
               <!-- {@const textWidth = 200} -->
               <svg
@@ -243,8 +246,7 @@
                 height={expSz}
                 class="expenditure"
                 class:clickable={isClickable(walkId, status, refundId, req)}
-                class:owing
-              >
+                class:owing>
                 {#if walkId && status}
                   <!-- <foreignObject x={0} y={y1 - 0.5} width={textWidth} height="1">
                     <div xmlns="http://www.w3.org/1999/xhtml" class="shorten">
@@ -257,8 +259,7 @@
                     y={y2 - 0.5}
                     width={maxX}
                     height={0.8}
-                    class="bg"
-                  />
+                    class="bg" />
                   <!-- <Icon req={status} x={expRight - 2.6} y={y + sz / 2 - 0.49} /> -->
                   {#each log2 as { dX, txt, req }, i}
                     <Icon x={expRight - dX} y={y2 - 0.47} {req} />
@@ -267,27 +268,25 @@
                       x={expRight - dX - 0.05}
                       y={y2}
                       {...RM}
-                      class="small">{txt}</text
-                    >
+                      class="small">{txt}</text>
                   {/each}
                 {/if}
                 <line x1={0} y1={0} x2={expRight} y2={0} class="line" />
                 {#if refundId && req}
                   <text x={hPad} y={sz / 2} {...LM}
-                    >{showDate(createdAt)} Refund    £{amount}</text
-                  >
+                    >{showDate(createdAt)} Refund    £{amount}</text>
                   <Icon {req} x={0 + hPad + 9} y={sz / 2 - 0.49} />
                 {/if}
 
                 y += 0.5;
-                {#each allocs as { id, amount, paymentId, historic }, j}
+                {#each allocs as { id, amount, refunded, paymentId, historic }, j}
                   <g class="allocs" class:historic>
                     <text
                       x={expRight - 0.24}
                       y={y3 + j + 0.5}
                       {...RM}
-                      class:owing={!paymentId}>{amount ? `£${amount}` : '—'}</text
-                    >
+                      class:refunded
+                      class:owing={!paymentId}>{`£${amount || refunded}`}</text>
                   </g>
                 {/each}
                 {#if status === 'BL'}
@@ -321,16 +320,15 @@
                 {y}
                 x={incLeft}
                 width={incWidth}
-                height={sz}
-              >
+                height={sz}>
                 <text x={incWidth - 2.6} y={y1} {...RM}>{paymentType(req)}</text>
                 <Icon {req} x={incWidth - 2.5} y={y1 - 0.49} />
                 <text x={incWidth - hPad} y={y1} {...RM}>{amount}</text>
 
-                {#each allocs as { id, amount, bookingId, refundId, historic }, j}
+                {#each allocs as { id, amount, refunded, bookingId, refundId, historic }, j}
                   <g class:historic class:avail={!bookingId && !refundId}>
-                    <text x={hPad} y={j + 0.5} {...LM}>{amount ? `£${amount}` : '—'}</text
-                    >
+                    <text x={hPad} class:refunded y={j + 0.5} {...LM}>
+                      {`£${amount || refunded}`}</text>
                   </g>
                 {/each}
                 {#if note}
@@ -339,8 +337,7 @@
                 {#if !bankingId}
                   <g
                     class="hideMe"
-                    on:click={() => onDeletePayment({ paymentId, amount })}
-                  >
+                    on:click={() => onDeletePayment({ paymentId, amount })}>
                     <rect x={0} y={0} width={incWidth} height={sz} rx="0.3" />
                     <text x={incWidth - 2.1} y={sz / 2} {...RM}>Delete? </text>
                     <Icon req="trash" x={incWidth - 2.0} y={sz / 2 - 0.49} />
@@ -355,13 +352,11 @@
     {/each}
     {#if totalAvailable > 0}
       <text x={incLeft} y={bot + 0.5} {...LM} class="total"
-        ><tspan class="avail">{`£${totalAvailable}`}</tspan> Credit</text
-      >
+        ><tspan class="avail">{`£${totalAvailable}`}</tspan> Credit</text>
     {/if}
     {#if totalOwing > 0}
       <text x={expLeft + expWidth} y={bot + 0.5} {...RM} class="total"
-        >Owing <tspan class="owing">{`£${totalOwing}`}</tspan></text
-      >
+        >Owing <tspan class="owing">{`£${totalOwing}`}</tspan></text>
     {/if}
     {#each _.values(lines) as { start, end, amount, historic }}
       {#if start && end}
@@ -372,8 +367,7 @@
           y2={end}
           class="line"
           class:dash={amount === 0}
-          class:historic
-        />
+          class:historic />
       {/if}
     {/each}
   </svg>

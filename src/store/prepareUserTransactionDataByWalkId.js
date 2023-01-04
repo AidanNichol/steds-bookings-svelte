@@ -369,7 +369,7 @@ function prepLogs(logs) {
   let txt = '';
   const step = 2.4;
   let dX = 3.1 - step;
-  logs = logs.filter((l, i) => l.req !== (logs[i - 1] || {}).req);
+  logs = logs.filter((l, i) => l.req !== logs[i - 1]?.req);
   let log2 = logs.map((log) => {
     txt = format(parseISO(log.id), 'd/MM');
     return { txt, req: log.req };

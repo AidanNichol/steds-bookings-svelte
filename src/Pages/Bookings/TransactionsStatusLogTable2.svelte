@@ -1,6 +1,6 @@
 <script context="module">
-  import { postTransRpt } from '@utils/use-data-api';
   import Logit from '@utils/logit';
+  import { postTransRpt } from '@utils/use-data-api';
   var logit = Logit('pages/bookings/TransactionsStatusLog');
   let pageEnds;
   let unit = 18;
@@ -17,22 +17,22 @@
 
 <script>
   // import { svgMap } from '@utils/iconMap.js';
-  import Marquee from './StatusTable/MarqueeSvg.svelte';
-  import DayHeader from './dayHeader.svelte';
-  import Icons from './TransactionLog/TransactionIcons.svelte';
-  import Icon from './TransactionLog/Icon.svelte';
-  import { format, addDays, parseISO } from 'date-fns';
   import { svgMap } from '@utils/iconMap';
+  import { addDays, format, parseISO } from 'date-fns';
+  import DayHeader from './dayHeader.svelte';
+  import Marquee from './StatusTable/MarqueeSvg.svelte';
+  import Icon from './TransactionLog/Icon.svelte';
+  import Icons from './TransactionLog/TransactionIcons.svelte';
 
-  import { dispDate } from '@utils/dateFns';
   import {
+    accountId,
     activityLogDataByWalkId,
     applyBookingChange,
     deletePayment,
     deleteRefund,
-    accountId,
     isLoading,
   } from '@store/accountStatus';
+  import { dispDate } from '@utils/dateFns';
   // import { latestBanking } from '@store/banking';
   import _ from 'lodash';
 
@@ -279,7 +279,7 @@
                 {/if}
 
                 y += 0.5;
-                {#each allocs as { id, amount, refunded, paymentId, historic }, j}
+                {#each allocs ?? [] as { id, amount, refunded, paymentId, historic }, j}
                   <g class="allocs" class:historic>
                     <text
                       x={expRight - 0.24}

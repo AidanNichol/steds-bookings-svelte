@@ -1,5 +1,6 @@
 import Logit from "@utils/logit";
-var logit = Logit("store/useDataApi");
+import URLON from "urlon";
+const logit = Logit("store/useDataApi");
 const db = "/bookingsServer/";
 
 export const getRequest = async (url) => {
@@ -10,7 +11,7 @@ export const getRequest = async (url) => {
 			cache: "no-cache",
 			credentials: "include",
 		});
-		let body = await res.json();
+		const body = await res.json();
 		logit(`getRequest ${url} returned:`, body);
 
 		return body;
@@ -32,7 +33,7 @@ export const postRequest = async (url, data) => {
 			},
 			body: JSON.stringify(data), // body data type must match "Content-Type" header
 		});
-		let body = await res.json();
+		const body = await res.json();
 		logit(`postRequest ${url} returned:`, body);
 		// console.log(`fetchData ${url} post:`, body);
 		return body;
@@ -52,7 +53,10 @@ function sleeper(ms) {
 
 export const fetchData = (url) => getRequest(`bookings/${url}`);
 export const fetchAuth = (url) => getRequest(`auth/${url}`);
-export const postData = (data) => postRequest("bookings/patches", data);
+export const postData = (data) => {
+	// postRequest("bookings/patches", data)
+	return getRequest(`bookings/patches?data=${btoa(JSON.stringify(data))}`);
+};
 export const postTransRpt = (data) =>
 	postRequest("bookings/account/transRpt", data);
 export const postTransRpt3 = (data) =>

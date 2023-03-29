@@ -1,5 +1,4 @@
 import Logit from "@utils/logit";
-import URLON from "urlon";
 const logit = Logit("store/useDataApi");
 const db = "/bookingsServer/";
 
@@ -53,6 +52,10 @@ function sleeper(ms) {
 
 export const fetchData = (url) => getRequest(`bookings/${url}`);
 export const fetchAuth = (url) => getRequest(`auth/${url}`);
+export const postData = (data) => {
+	// postRequest("bookings/patches", data)
+	return getRequest(`bookings/patches?data=${btoa(JSON.stringify(data))}`);
+};
 export const postData = (data) => {
 	// postRequest("bookings/patches", data)
 	return getRequest(`bookings/patches?data=${btoa(JSON.stringify(data))}`);

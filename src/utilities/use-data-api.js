@@ -54,12 +54,9 @@ export const fetchData = (url) => getRequest(`bookings/${url}`);
 export const fetchAuth = (url) => getRequest(`auth/${url}`);
 export const postData = (data) => {
 	// postRequest("bookings/patches", data)
-	return getRequest(`bookings/patches?data=${btoa(JSON.stringify(data))}`);
+	return getRequest(`bookings/patches?body=${btoa(JSON.stringify(data))}`);
 };
-export const postData = (data) => {
-	// postRequest("bookings/patches", data)
-	return getRequest(`bookings/patches?data=${btoa(JSON.stringify(data))}`);
-};
+
 export const postTransRpt = (data) =>
 	postRequest("bookings/account/transRpt", data);
 export const postTransRpt3 = (data) =>

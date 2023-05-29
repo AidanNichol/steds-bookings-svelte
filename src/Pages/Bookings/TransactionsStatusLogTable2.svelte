@@ -290,6 +290,7 @@
                   </g>
                 {/each}
                 {#if status === 'BL'}
+                  <!-- svelte-ignore a11y-click-events-have-key-events -->
                   <g class="hideMe" on:click={() => resetLate({ walkId, memberId })}>
                     <rect x={0} y={0} width={expWidth} height={sz} rx="0.3" />
                     <text x={expCenter} y={y2} {...CM}>change    to    ? </text>
@@ -298,6 +299,7 @@
                   </g>
                 {/if}
                 {#if refundId && req}
+                  <!-- svelte-ignore a11y-click-events-have-key-events -->
                   <g class="hideMe" on:click={() => onDeleteRefund({ refundId, amount })}>
                     <rect x={0} y={0} width={expWidth} height={sz} rx="0.3" />
                     <text x={expRight - 2.1} y={sz / 2} {...RM}>Delete? </text>
@@ -335,6 +337,7 @@
                   <Marquee x={hPad + 0.7} y={sz - 1} width={incWidth - 1.3} text={note} />
                 {/if}
                 {#if !bankingId}
+                  <!-- svelte-ignore a11y-click-events-have-key-events -->
                   <g
                     class="hideMe"
                     on:click={() => onDeletePayment({ paymentId, amount })}>

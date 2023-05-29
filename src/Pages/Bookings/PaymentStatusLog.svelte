@@ -1,4 +1,6 @@
 <script>
+  /* cSpell: disable */
+  /* svelte-ignore a11y-click-events-have-key-events */
   import TheTable2 from './TransactionsStatusLogTable2.svelte';
   import { printTransactionReport } from './TransactionsStatusLogTable2.svelte';
   // import TheTable3 from './TransactionsStatusLogTable.svelte';
@@ -63,24 +65,25 @@
   <div class={'Table ' + ($$props.class ?? '')}>
     <div class="logHeader">
       <div class="rptButtons">
+        <!-- svelte-ignore a11y-click-events-have-key-events -->
         <span on:click={cycleReport} class="clickable file">{@html svgMap.file_alt}</span>
         {#if reportNo > 0}
+          <!-- svelte-ignore a11y-click-events-have-key-events -->
           <div
             on:click={toggleShowByWalk}
             class="clickable"
-            title={`change to group by ${$showByWalk ? 'Booking' : 'Walk'} Date`}
-          >
+            title={`change to group by ${$showByWalk ? 'Booking' : 'Walk'} Date`}>
             <div>Grouped By</div>
             <div>
               {$showByWalk ? 'Walk Date' : 'Booking Date'}
             </div>
           </div>
           {#if $showByWalk}
+            <!-- svelte-ignore a11y-click-events-have-key-events -->
             <div
               on:click={toggleSortByWalk}
               class="clickable"
-              title={`change to sort by ${$sortByWalk ? 'Booking' : 'Walk'} Date`}
-            >
+              title={`change to sort by ${$sortByWalk ? 'Booking' : 'Walk'} Date`}>
               <div>Sorted By</div>
               <div>
                 {$sortByWalk ? 'Walk Date' : 'Booking Date'}
@@ -91,6 +94,7 @@
       </div>
 
       {#if reportNo === 1}
+        <!-- svelte-ignore a11y-click-events-have-key-events -->
         <span class="print clickable" on:click={onPrint} title="Print Activity Report">
           {@html svgMap.Printer}
         </span>

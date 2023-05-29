@@ -337,6 +337,13 @@ export const deleteRefund = createUpdateFunction(processDeleteRefund, 'deleteRef
 export const balance = derived(fundsManager, ($fundsManager) => $fundsManager.balance);
 function initalizeFundsManagment(activeBookings, activePayments, activeRefunds) {
   logit('activeBookings', activeBookings);
+  activeBookings.forEach(b=>{
+
+    let totalPaid= b.Allocations2.reduce((totalPaid, a)=>totalPaid+a.amount, 0);
+    if (b.owing!==b.fee-totalPaid)logit('badOwing', b)
+    b.owing=b.fee-totalPaid;
+    logit ('totalPaid', totalPaid, b)
+  })
   // activeBookings.Members.forEach((m) => bookingsData.push(...m.Bookings));
   const payments = _.keyBy(activePayments, 'paymentId');
   const bookings = _.keyBy(activeBookings, 'bookingId');

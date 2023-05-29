@@ -75,6 +75,10 @@ export const debts = derived(
 		dMap = _.groupBy(dMap, (b) => b.sortName);
 		const pairs = _.sortBy(_.toPairs(dMap), (item) => item[0]);
 		debtsDue = pairs.map(([sortName, bookings]) => {
+			bookings.forEach(b=>{
+				let totalPaid = (b.Allocations??[]).reduce((total, a)=>total+a.amount,0);
+				b.owing=b.fee-totalPaid;
+			})
 			const balance = bookings.reduce((tot, b) => tot + b.owing, 0);
 			const accountId = bookings[0].accountId;
 			return { sortName, accountId, balance, bookings };

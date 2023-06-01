@@ -6,7 +6,7 @@
   import Bookings from '../Bookings/BookingsStatus.svelte';
   import BusLists from '../Buslists/BusLists.svelte';
   import Payments from '../Payments/PaymentsMST.svelte';
-  import IconsPage from '../IconsPage.svelte';
+  // import IconsPage from '../IconsPage.svelte';
   import { page } from '@store/router';
   import { loaded, loading } from '@store/store';
   import { userStore } from '@store/user';
@@ -37,7 +37,7 @@
     bookings: Bookings,
     payments: Payments,
     buslists: BusLists,
-    icons: IconsPage,
+    // icons: IconsPage,
     debugSettings: DebugOptions,
   };
 
@@ -68,8 +68,7 @@
       alt=""
       on:click={() => {
         page.set('debugSettings');
-      }}
-    />
+      }} />
     <span class="version">{`v${version}`}</span>
     <div class="signin">
       <LoginForm />
@@ -79,9 +78,9 @@
         <Link toPage="bookings" name="Bookings" />
         <Link toPage="buslists" name="Buslist" />
         <Link toPage="payments" name="Payments" />
-        {#if $userStore.roles.includes('admin')}
+        <!-- {#if $userStore.roles.includes('admin')}
           <Link toPage="icons" name="Icons" />
-        {/if}
+        {/if} -->
       {/if}
       {#if $userStore.hasMembersRole}
         <Link toPage="membersList" name="Members" />

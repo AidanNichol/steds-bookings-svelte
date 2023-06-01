@@ -28,31 +28,34 @@
           label="Show Payments Made"
           onClick={toggleDisplay}
           tiptext="Show Payments Made"
-          visible
-        />
+          visible />
       </div>
       {#each $accounts as account}
-        <div class=" member-rcpt">
-          <div class="overview">
-            <span class="who" onClick={() => showMemberBookings(account.accountId)}>
-              {' '}
-              {account.sortName}
-            </span>
-            <span class="owed">{`£${account.balance}`}</span>
-          </div>
-          {#each account.bookings as bkng}
-            <div class="Detail" class:newBkng={!bkng.owing}>
-              <span>{bkng.displayDate}</span>
-
-              <Icon name={bkng.status} width="16" />
-              <span>
-                <span class="name">{bkng.name}</span>
-                {bkng.venue}
+        {#if account.balance > 0}
+          <div class=" member-rcpt">
+            <div class="overview">
+              <span class="who" onClick={() => showMemberBookings(account.accountId)}>
+                {' '}
+                {account.sortName}
               </span>
-              <span>£{bkng.owing}</span>
+              <span class="owed">{`£${account.balance}`}</span>
             </div>
-          {/each}
-        </div>
+            {#each account.bookings as bkng}
+              {#if bkng.owing > 0}
+                <div class="Detail" class:newBkng={!bkng.owing}>
+                  <span>{bkng.displayDate}</span>
+
+                  <Icon name={bkng.status} width="16" />
+                  <span>
+                    <span class="name">{bkng.name}</span>
+                    {bkng.venue}
+                  </span>
+                  <span>£{bkng.owing}</span>
+                </div>
+              {/if}
+            {/each}
+          </div>
+        {/if}
       {/each}
     </div>
   {/if}

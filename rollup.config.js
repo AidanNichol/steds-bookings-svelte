@@ -22,6 +22,7 @@ import process from 'process';
 // import { spawn } from 'child_process';
 
 const production = !process.env.ROLLUP_WATCH;
+console.log("production", production)
 
 // function serve() {
 //   let server;
@@ -178,6 +179,7 @@ export default {
             to: 'http://localhost:4444/bookingsServer/',
           },
         ],
+        onListen(server) { server.log.info('Hello world') }
       }),
     // // In dev mode, call `npm run start` once
     // // the bundle has been generated

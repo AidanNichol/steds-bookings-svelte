@@ -71,8 +71,7 @@
           onClick={toggleDisplay}
           tiptext="Show Payments Due"
           class="tab-select"
-          visible
-        />
+          visible />
         <TooltipButton
           placement="bottom"
           onClick={() => {
@@ -82,8 +81,7 @@
           visible={$showBanking}
           style={{ maxHeight: 54, padding: '2px 5px' }}
           img={Notes20}
-          iconStyle="height: 40px;"
-        />
+          iconStyle="height: 40px;" />
         <a
           class="print"
           href="/bookingsServer/bookings/payment/paymentsReceivedRpt"
@@ -98,6 +96,7 @@
       {#each $paymentsMade as account}
         <div class={' member-rcpt'}>
           <div class="overview">
+            <!-- svelte-ignore a11y-click-events-have-key-events -->
             <span class="who" on:click={() => showMemberBookings(account.members[0]._id)}>
               {' '}
               {account.sortName}

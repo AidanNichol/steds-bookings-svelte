@@ -8,6 +8,7 @@
 
 <!-- <span>{name}</span> -->
 
+<!-- svelte-ignore a11y-click-events-have-key-events -->
 <span on:click={() => page.set(toPage)} class="link" class:selected={$page === toPage}>
   {name}
 </span>

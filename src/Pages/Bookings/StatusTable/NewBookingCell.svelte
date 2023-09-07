@@ -27,14 +27,17 @@
   const ht = 'height: 100%;';
 </script>
 
-<div class="bookingcell ">
+<div class="bookingcell">
   <div class="hotRow">
+    <!-- svelte-ignore a11y-click-events-have-key-events -->
     <div on:click={() => bookMe(reqType)}>
       {@html svgMap[reqType]}
     </div>
   </div>
   <div class="hotRow">
+    <!-- svelte-ignore a11y-click-events-have-key-events -->
     <div style={ht} on:click={() => bookMe('W')}>{@html svgMap.W}</div>
+    <!-- svelte-ignore a11y-click-events-have-key-events -->
     <div style={ht} on:click={() => bookMe('C')}>{@html svgMap.C}</div>
   </div>
 </div>

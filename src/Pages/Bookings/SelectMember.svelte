@@ -62,16 +62,15 @@
     placeholder="Search for Member..."
     on:keydown={handleKeydown}
     on:focus={onFocus}
-    on:blur={onBlur}
-  />
+    on:blur={onBlur} />
   {#if showList}
     <div class="listBox">
       {#each fMembers as mem}
+        <!-- svelte-ignore a11y-click-events-have-key-events -->
         <div
           class="member"
           class:deleteable={isDeletable(mem)}
-          on:click={() => selectMem(mem.memberId)}
-        >
+          on:click={() => selectMem(mem.memberId)}>
           {@html dispName(mem.sortName)}
         </div>
       {/each}

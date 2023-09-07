@@ -20,7 +20,8 @@
   logit('PushUpSelect', options, value);
 </script>
 
-<div on:click={toggleShow} class="PushUp " class:open={showOptions}>
+<!-- svelte-ignore a11y-click-events-have-key-events -->
+<div on:click={toggleShow} class="PushUp" class:open={showOptions}>
   <div class="options" class:show={showOptions}>
     {#each options as option}
       <div on:click={() => changedOpt(option)}>

@@ -51,6 +51,7 @@
 {#if !$newMember}
   <div class="account-box" hidden={$newMember}>
     {#each extraMembers as [memberId, fullName], i}
+      <!-- svelte-ignore a11y-click-events-have-key-events -->
       <div class="member" on:click={() => setCurrentId(memberId)}>
         &nbsp;Also: {memberId}
         {fullName}
@@ -63,8 +64,7 @@
           label="+"
           onClick={() => (stage = '?')}
           tiptext="merge another account into this one"
-          visible={editMode && stage === ''}
-        />
+          visible={editMode && stage === ''} />
 
         <div class="active" hidden={stage === ''}>
           <div class="mAcc">

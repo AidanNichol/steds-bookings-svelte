@@ -61,6 +61,7 @@
 <Modal show={$modal}>
   <!-- <div style="height: 100%;"> -->
   <div class="mainPage">
+    <!-- svelte-ignore a11y-click-events-have-key-events -->
     <img
       class="logo"
       src={logo}

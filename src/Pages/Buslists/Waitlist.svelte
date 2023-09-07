@@ -15,6 +15,7 @@
   <div class="waiting-list">
     <h4>Waiting List</h4>
     {#each list as bkng, i}
+      <!-- svelte-ignore a11y-click-events-have-key-events -->
       <div class="member" on:click={() => showBookings(bkng.memberId)}>
         <div class="wName">
           <span class="pos">{i + 1}.</span>

@@ -40,12 +40,15 @@
     <Marquee text={annotation} />
   </div>
   <div class="hotRow">
+    <!-- svelte-ignore a11y-click-events-have-key-events -->
     <div on:click={() => bookMe(cancel)}>{@html svgMap[cancel]}</div>
     {#if status === 'W'}
+      <!-- svelte-ignore a11y-click-events-have-key-events -->
       <div on:click={() => bookMe('B')}>{@html svgMap.B}</div>
     {/if}
   </div>
 
+  <!-- svelte-ignore a11y-click-events-have-key-events -->
   <div class="hotRow" on:click={() => openAnnotations(booking)}>
     <div title={annotation} on:click={() => openAnnotations(booking)}>
       {@html svgMap.A}

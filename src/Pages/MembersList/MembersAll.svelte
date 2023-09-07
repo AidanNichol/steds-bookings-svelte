@@ -39,11 +39,11 @@
 
 <div class="list">
   {#each $sortedListSlice as member}
+    <!-- svelte-ignore a11y-click-events-have-key-events -->
     <div
       class={clss(member)}
       class:current={$currentMemberId === member.memberId}
-      on:click={() => selectMember(member.memberId)}
-    >
+      on:click={() => selectMember(member.memberId)}>
       <span class="line-name">
         <span class="id">{member.memberId.substr(1)}</span>
         <span class="name">{member.lastName + ', ' + member.firstName}</span>

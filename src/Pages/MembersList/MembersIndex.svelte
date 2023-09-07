@@ -44,6 +44,7 @@
   $: logit('indx', indx);
 </script>
 
+<!-- svelte-ignore a11y-click-events-have-key-events -->
 <div class="index" hidden={$editMode}>
   <div on:click={pageUp}>
     <Icon name="page_up" />

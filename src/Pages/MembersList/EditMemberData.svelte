@@ -222,6 +222,7 @@
       {$formFields.lastName}
       {$isDirty ? '(changed)' : ''}
       <!-- {isFetching && <Loading styleI={{ width: '1em', height: '1em' }} />} -->
+      <!-- svelte-ignore a11y-click-events-have-key-events -->
       <span hidden={!$editMode || $isDirty} class="closeWindow" on:click={closeEdit}>
         {!$editMode || $isDirty ? '' : 'X'}
       </span>
@@ -246,8 +247,7 @@
               $subsStatus.showState < 'S' &&
               $subsStatus?.showSubsButton &&
               $formFields.subscription !== $subsStatus?.year}
-            style={{ width: 190 }}
-          />
+            style={{ width: 190 }} />
         </div>
         <div style={{ margin: 8 }}>
           <FormControl name="memberStatus">
@@ -255,8 +255,7 @@
               name="memberStatus"
               items={msItems}
               selectedValue={$formFields.memberStatus}
-              on:select={memberStatusChanged}
-            />
+              on:select={memberStatusChanged} />
           </FormControl>
         </div>
         <TextField multiline name="nextOfKin" bind:refresh />
@@ -268,8 +267,7 @@
             isMulti={true}
             renderValue={(v) => v.join(', ')}
             on:select={roleChanged}
-            items={roleOptions}
-          />
+            items={roleOptions} />
         </FormControl>
         <TextField name="memberId" disable style="width: 10ch" />
 
@@ -278,8 +276,7 @@
           <AccountMembers
             member={$formFields}
             newMember={$newMember}
-            editMode={$editMode}
-          />
+            editMode={$editMode} />
         </div>
       </form>
 
@@ -290,27 +287,23 @@
           label="Edit"
           onClick={setEditMode}
           visible={!$editMode}
-          style={ttButtonStyle}
-        />
+          style={ttButtonStyle} />
         <TooltipButton
           label="Close"
           onClick={closeEdit}
           visible={$editMode && !$isDirty}
-          style={ttButtonStyle}
-        />
+          style={ttButtonStyle} />
         <TooltipButton
           label="Discard"
           onClick={reset}
           visible={$editMode && $isDirty && $formFields.deleteState !== 'X'}
-          style={ttButtonStyle}
-        />
+          style={ttButtonStyle} />
         <TooltipButton
           label="Save"
           onClick={saveChanges}
           tiptext="Save All Changes to this Member"
           visible={$editMode && $formFields.deleteState !== 'X' && $isDirty}
-          style={ttButtonStyle}
-        />
+          style={ttButtonStyle} />
         <SuspendButtons
           {...{
             setDeceased,
@@ -318,8 +311,7 @@
             deleteMember,
             newMember: $newMember,
             deleteState: $formFields.deleteState,
-          }}
-        />
+          }} />
       </form>
     </div>
   </Panel>

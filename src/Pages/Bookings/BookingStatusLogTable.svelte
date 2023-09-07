@@ -111,8 +111,10 @@
 
 <div class="scrollBox">
   {#if highlight}
+    <!-- svelte-ignore a11y-click-events-have-key-events -->
     <div class="highlight-container" on:click={() => setHighlightDate(null)}>
       {#if highlight?.deletable}
+        <!-- svelte-ignore a11y-click-events-have-key-events -->
         <div
           class="delPayment"
           on:click={() => onDeletePayment()}
@@ -153,6 +155,7 @@
               <span>{dispDate(_.last(booking.BookingLogs).id)}</span>
               <span class="icon" class:reset={booking.status === 'BL'}
                 >{@html svgMap[booking.status]}
+                <!-- svelte-ignore a11y-click-events-have-key-events -->
                 <span class="resetLate" on:click={() => resetLate(booking)}>
                   {@html svgMap.BL}{@html svgMap.long_arrow_right}{@html svgMap.BX}
                 </span>
@@ -166,8 +169,7 @@
           {#each preparePayments(mBookings) as pay}
             <div
               class:highlight={highlight?.paymentId === pay.paymentId}
-              on:click={() => setHighlightDate(pay)}
-            >
+              on:click={() => setHighlightDate(pay)} on:keyup={() => setHighlightDate(pay)}>
               <span class="payDate">{dispDate(pay.paymentId)}</span>
               <span class="icon">{@html svgMap[pay.req]}</span>
 
@@ -204,6 +206,7 @@
         <div class="payments">
           {#each credits as pay}
             <div class:highlight={highlight?.paymentId === pay.paymentId}>
+              <!-- svelte-ignore a11y-click-events-have-key-events -->
               <span
                 class="payDate"
                 on:click={() => setHighlightDate({ ...pay, deletable: true })}
@@ -235,6 +238,7 @@
         <div class="payments">
           {#each refund.Allocations as pay}
             <div class:highlight={highlight?.paymentId === pay.paymentId}>
+              <!-- svelte-ignore a11y-click-events-have-key-events -->
               <span
                 class="payDate"
                 on:click={() => setHighlightDate({ ...pay, deletable: true })}

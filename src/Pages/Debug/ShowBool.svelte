@@ -16,14 +16,14 @@
   };
 </script>
 
+<!-- svelte-ignore a11y-click-events-have-key-events -->
 <div class={'bool ' + stateName + ' ' + className} on:click={onClick}>
   <span>
     <input
       type="checkbox"
       indeterminate={obj.state === select.SOME}
       checked={obj.state}
-      readOnly
-    />{' '}
+      readOnly />{' '}
     {obj.name}
   </span>
   <span>

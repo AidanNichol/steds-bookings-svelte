@@ -115,7 +115,9 @@ const upsertBooking = (draft, payload) => {
       createdAt: dat,
     };
     logit('booking 1', booking, dat);
-  } else logit('booking 1', current(booking), dat);
+  } else {
+    logit('booking 1', current(booking), dat);
+  }
   if (req === booking.status) return null;
   let late = booking.late || req === 'BL';
   const fee = walkFee * factor[req];

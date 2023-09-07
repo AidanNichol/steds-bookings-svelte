@@ -303,7 +303,6 @@ const createUpdateFunction = (process, name) => {
       return;
     }
     patches[2] = accountId;
-    addToPatchesQueue(patches);
     logit(`${name} nextState`, nextState, patches);
     fm = initalizeFundsManagment(
       _.values(nextState.bookings),
@@ -311,6 +310,7 @@ const createUpdateFunction = (process, name) => {
     );
 
     fundsManager.set(fm);
+    addToPatchesQueue(patches);
   };
 };
 export const applyBookingChange = createUpdateFunction(
@@ -337,13 +337,15 @@ export const deleteRefund = createUpdateFunction(processDeleteRefund, 'deleteRef
 export const balance = derived(fundsManager, ($fundsManager) => $fundsManager.balance);
 function initalizeFundsManagment(activeBookings, activePayments, activeRefunds) {
   logit('activeBookings', activeBookings);
-  activeBookings.forEach(b=>{
-
-    let totalPaid= b.Allocations2.reduce((totalPaid, a)=>totalPaid+a.amount, 0);
-    if (b.owing!==b.fee-totalPaid)logit('badOwing', b)
-    b.owing=b.fee-totalPaid;
-    logit ('totalPaid', totalPaid, b)
-  })
+  activeBookings.forEach((b) => {
+    let totalPaid = (b.Allocations2 ?? []).reduce(
+      (totalPaid, a) => totalPaid + a.amount,
+      0,
+    );
+    if (b.owing !== b.fee - totalPaid) logit('badOwing', b, totalPaid);
+    // b.owing = b.fee - totalPaid;
+    logit('totalPaid', totalPaid, b);
+  });
   // activeBookings.Members.forEach((m) => bookingsData.push(...m.Bookings));
   const payments = _.keyBy(activePayments, 'paymentId');
   const bookings = _.keyBy(activeBookings, 'bookingId');

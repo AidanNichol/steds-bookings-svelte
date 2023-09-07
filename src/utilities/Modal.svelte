@@ -162,10 +162,10 @@
   <div
     class="bg"
     on:click={handleOuterClick}
+    on:keyup={handleOuterClick}
     bind:this={background}
     transition:currentTransitionBg={state.transitionBgProps}
-    style={cssBg}
-  >
+    style={cssBg}>
     <div class="window-wrap" bind:this={wrap} style={cssWindowWrap}>
       <div
         class="window"
@@ -177,8 +177,7 @@
         on:outrostart={onClose}
         on:introend={onOpened}
         on:outroend={onClosed}
-        style={cssWindow}
-      >
+        style={cssWindow}>
         {#if state.closeButton}
           {#if isFunction(state.closeButton)}
             <svelte:component this={state.closeButton} onClose={close} />

@@ -1,5 +1,5 @@
 import { writable, get } from 'svelte/store';
-import produce from 'immer';
+import { produce } from 'immer';
 
 export const createImmerActionStore = (value, actions = {}) => {
   const store = writable(value);

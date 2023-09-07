@@ -15,7 +15,31 @@
       "processor": "svelte3/svelte3"
     }
   ],
-  "rules": {},
+  "rules": {
+    "a11y-aria-attributes": 0,
+    "a11y-incorrect-aria-attribute-type": 0,
+    "a11y-unknown-aria-attribute": 0,
+    "a11y-hidden": 0,
+    "a11y-misplaced-role": 0,
+    "a11y-unknown-role": 0,
+    "a11y-no-abstract-role": 0,
+    "a11y-no-redundant-roles": 0,
+    "a11y-role-has-required-aria-props": 0,
+    "a11y-accesskey": 0,
+    "a11y-autofocus": 0,
+    "a11y-misplaced-scope": 0,
+    "a11y-positive-tabindex": 0,
+    "a11y-invalid-attribute": 0,
+    "a11y-missing-attribute": 0,
+    "a11y-img-redundant-alt": 0,
+    "a11y-label-has-associated-control": 0,
+    "a11y-media-has-caption": 0,
+    "a11y-distracting-elements": 0,
+    "a11y-structure": 0,
+    "a11y-mouse-events-have-key-events": 0,
+    "a11y-missing-content": 0,
+    "a11y-click-events-have-key-events": 0
+  },
   "globals": {
     "__filename": true,
     "__dirname": true,

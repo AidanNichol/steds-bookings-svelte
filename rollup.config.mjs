@@ -1,3 +1,5 @@
+import path from 'path';
+import { fileURLToPath } from 'url';
 import svelte from 'rollup-plugin-svelte';
 import commonjs from '@rollup/plugin-commonjs';
 import resolve from '@rollup/plugin-node-resolve';
@@ -8,7 +10,7 @@ import json from '@rollup/plugin-json';
 import alias from '@rollup/plugin-alias';
 import injectProcessEnv from 'rollup-plugin-inject-process-env';
 import livereload from 'rollup-plugin-livereload';
-import { terser } from 'rollup-plugin-terser';
+import terser from '@rollup/plugin-terser';
 import findUnused from 'rollup-plugin-unused';
 // import { generateSW } from 'rollup-plugin-workbox';
 //...
@@ -17,12 +19,14 @@ import sveltePreprocess from 'svelte-preprocess';
 // import autoPreprocess from 'svelte-preprocess';
 import css from 'rollup-plugin-css-only';
 import dev from 'rollup-plugin-dev';
-import path from 'path';
 import process from 'process';
+const __filename = fileURLToPath(import.meta.url);
+
+const __dirname = path.dirname(__filename);
 // import { spawn } from 'child_process';
 
 const production = !process.env.ROLLUP_WATCH;
-console.log("production", production)
+console.log('production', production);
 
 // function serve() {
 //   let server;
@@ -85,6 +89,11 @@ export default {
       ],
     }),
     svelte({
+      onwarn: (warning, handler) => {
+        // disable a11y warnings
+        if (warning.code.startsWith('a11y-')) return;
+        handler(warning);
+      },
       preprocess: sveltePreprocess({
         postcss: true,
       }),
@@ -179,7 +188,9 @@ export default {
             to: 'http://localhost:4444/bookingsServer/',
           },
         ],
-        onListen(server) { server.log.info('Hello world') }
+        onListen(server) {
+          server.log.info('Hello world');
+        },
       }),
     // // In dev mode, call `npm run start` once
     // // the bundle has been generated

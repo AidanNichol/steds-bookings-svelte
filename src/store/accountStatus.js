@@ -19,7 +19,7 @@ import { prepareUserTransactionDataByWalkId } from './prepareUserTransactionData
 import _ from 'lodash';
 import Logit from '@utils/logit';
 
-var logit = Logit('store/accountStatus');
+const logit = Logit('store/accountStatus');
 enablePatches();
 /*
     ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
@@ -63,13 +63,13 @@ export const accountMembers = derived(
     if (!$accountId) {
       return;
     }
-    let mems = $nameIndex.get($accountId)?.Members;
+    const mems = $nameIndex.get($accountId)?.Members;
     logit('accountMembers', mems);
     set(mems);
   },
   [],
 );
-let fmData = {
+const fmData = {
   balance: 0,
   status: [],
   Members: [],
@@ -140,8 +140,8 @@ const getAccountData = async (accountId) => {
   // const accountId = $nameIndex?.get($memberId)?.accountId;
   isLoading.set(true);
 
-  let data = await fetchData(`account/activeData/${accountId}/${sDate}`);
-  let { bookings, payments, refunds } = data;
+  const data = await fetchData(`account/activeData/${accountId}/${sDate}`);
+  const { bookings, payments, refunds } = data;
   const fm = initalizeFundsManagment(bookings, payments, refunds);
   logit('new FundsManager', fm);
   fundsManager.set(fm);
@@ -184,7 +184,7 @@ const historicBookings = derived(
       `${$accountId}/${$startDate}/${$newStartDate}`,
       res,
     );
-    let bookings = flattenBookings(res);
+    const bookings = flattenBookings(res);
     set(bookings);
   },
   [],
@@ -337,15 +337,15 @@ export const deleteRefund = createUpdateFunction(processDeleteRefund, 'deleteRef
 export const balance = derived(fundsManager, ($fundsManager) => $fundsManager.balance);
 function initalizeFundsManagment(activeBookings, activePayments, activeRefunds) {
   logit('activeBookings', activeBookings);
-  activeBookings.forEach((b) => {
-    let totalPaid = (b.Allocations2 ?? []).reduce(
+  for (const b of activeBookings) {
+    const totalPaid = (b.Allocations2 ?? []).reduce(
       (totalPaid, a) => totalPaid + a.amount,
       0,
     );
     if (b.owing !== b.fee - totalPaid) logit('badOwing', b, totalPaid);
     // b.owing = b.fee - totalPaid;
     logit('totalPaid', totalPaid, b);
-  });
+  }
   // activeBookings.Members.forEach((m) => bookingsData.push(...m.Bookings));
   const payments = _.keyBy(activePayments, 'paymentId');
   const bookings = _.keyBy(activeBookings, 'bookingId');

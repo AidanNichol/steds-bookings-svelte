@@ -274,8 +274,8 @@
                 <line x1={0} y1={0} x2={expRight} y2={0} class="line" />
                 {#if refundId && req}
                   <text x={hPad} y={sz / 2} {...LM}
-                    >{showDate(createdAt)} Refund    £{amount}</text>
-                  <Icon {req} x={0 + hPad + 9} y={sz / 2 - 0.49} />
+                    >{showDate(refundId)} Refund    £{amount}</text>
+                  <Icon {req} x={0 + hPad + 12} y={sz / 2 - 0.49} />
                 {/if}
 
                 y += 0.5;

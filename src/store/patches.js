@@ -6,7 +6,7 @@ import { nameIndex } from '@store/nameIndex.js';
 // import { dispDate } from '../dateFns';
 
 import Logit from '@utils/logit';
-var logit = Logit('store/patches');
+const logit = Logit('store/patches');
 const debug = (x) => x;
 const names = get(nameIndex);
 /*
@@ -59,6 +59,7 @@ const expandPatch = (arr) => {
   logit('patches.in', debug(patches));
   let memberId;
 
+  // biome-ignore lint/complexity/noForEach: <explanation>
   patches.forEach((p) => {
     if (/Stack$/i.test(p.path[0])) return;
     if (p.path[0] === 'balance') return;
@@ -123,6 +124,7 @@ const expandPatch = (arr) => {
   const tableSeq = {
     Booking: '1',
     BookingLog: '2',
+    Refund: '1',
     Payment: '1',
     Allocation: '2',
     Account: '1',
